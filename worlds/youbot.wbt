@@ -1,0 +1,579 @@
+#VRML_SIM R2023b utf8
+
+EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2023b/projects/objects/backgrounds/protos/TexturedBackground.proto"
+EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2023b/projects/objects/backgrounds/protos/TexturedBackgroundLight.proto"
+EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2023b/projects/robots/kuka/youbot/protos/KukaBox.proto"
+EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2023b/projects/robots/kuka/youbot/protos/Youbot.proto"
+EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2023b/projects/objects/apartment_structure/protos/Wall.proto"
+EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2023b/projects/objects/road/protos/StraightRoadSegment.proto"
+EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2023b/projects/appearances/protos/Asphalt.proto"
+EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2023b/projects/objects/floors/protos/RectangleArena.proto"
+
+WorldInfo {
+  info [
+    "Simulation of the KUKA youBot robot."
+    "This model includes an accurate and fast simulation of the Meccanum wheels."
+    "The robot can be equiped with various sensors (including the Microsoft Kinect) and configured with zero, one or two arms."
+  ]
+  title "KUKA youBot"
+  basicTimeStep 16
+  contactProperties [
+    ContactProperties {
+      material1 "InteriorWheelMat"
+      coulombFriction [
+        0, 2, 0
+      ]
+      frictionRotation -0.785398 0
+      bounce 0
+      forceDependentSlip [
+        10, 0
+      ]
+    }
+    ContactProperties {
+      material1 "ExteriorWheelMat"
+      coulombFriction [
+        0, 2, 0
+      ]
+      frictionRotation 0.785398 0
+      bounce 0
+      forceDependentSlip [
+        10, 0
+      ]
+    }
+  ]
+}
+Viewpoint {
+  fieldOfView 0.785399
+  orientation -0.2964976644387036 -0.0028639610851621624 0.9550292836920221 3.160051503479333
+  position 13.245461166784288 1.0204446490781662 6.81987246239739
+  follow "youBot"
+}
+TexturedBackground {
+}
+TexturedBackgroundLight {
+}
+RectangleArena {
+  floorSize 16 10
+  floorAppearance NULL
+  wallHeight 0.5
+}
+Pose {
+  children [
+    Pose {
+      translation 3 4.5 0.001
+      children [
+        Shape {
+          appearance Appearance {
+            material Material {
+              diffuseColor 0 0 0
+              emissiveColor 1 1 0
+            }
+          }
+          geometry Plane {
+          }
+        }
+      ]
+    }
+    Pose {
+      translation 3 -4.5 0.001
+      children [
+        Shape {
+          appearance Appearance {
+            material Material {
+              diffuseColor 0 0 0
+              emissiveColor 0 0 1
+            }
+          }
+          geometry Plane {
+          }
+        }
+      ]
+    }
+    Pose {
+      translation 6 -4.5 0.001
+      children [
+        Shape {
+          appearance Appearance {
+            material Material {
+              diffuseColor 0 0 0
+              emissiveColor 0 1 0
+            }
+          }
+          geometry Plane {
+          }
+        }
+      ]
+    }
+    Pose {
+      translation 6 4.5 0.001
+      children [
+        Shape {
+          appearance Appearance {
+            material Material {
+              diffuseColor 0 0 0
+              emissiveColor 1 0 0
+            }
+          }
+          geometry Plane {
+          }
+        }
+      ]
+    }
+    StraightRoadSegment {
+      translation 3 0 0.001
+      rotation 0 0 1 -1.5707996938995747
+      name "cross_road_4"
+      width 0.2
+      numberOfLanes 1
+      roadBorderHeight 0
+      startingRoadBorderWidth 0
+      endingRoadBorderWidth 0
+      rightBorder FALSE
+      leftBorder FALSE
+      length 4
+      appearance Asphalt {
+        colorOverride 0 0 0
+        IBLStrength 0
+      }
+    }
+    StraightRoadSegment {
+      translation 3 0 0.001
+      rotation 0 0 1 1.5707996938995747
+      name "cross_road_3"
+      width 0.2
+      numberOfLanes 1
+      roadBorderHeight 0
+      startingRoadBorderWidth 0
+      endingRoadBorderWidth 0
+      rightBorder FALSE
+      leftBorder FALSE
+      length 4
+      appearance Asphalt {
+        colorOverride 0 0 0
+        IBLStrength 0
+      }
+    }
+    StraightRoadSegment {
+      translation 6 0 0.001
+      rotation 0 0 1 -1.5707996938995747
+      name "cross_road_2"
+      width 0.2
+      numberOfLanes 1
+      roadBorderHeight 0
+      startingRoadBorderWidth 0
+      endingRoadBorderWidth 0
+      rightBorder FALSE
+      leftBorder FALSE
+      length 4
+      appearance Asphalt {
+        colorOverride 0 0 0
+        IBLStrength 0
+      }
+    }
+    StraightRoadSegment {
+      translation 6 0 0.001
+      rotation 0 0 1 1.5708003061004252
+      name "cross_road_1"
+      width 0.2
+      numberOfLanes 1
+      roadBorderHeight 0
+      startingRoadBorderWidth 0
+      endingRoadBorderWidth 0
+      rightBorder FALSE
+      leftBorder FALSE
+      length 4
+      appearance Asphalt {
+        colorOverride 0 0 0
+        IBLStrength 0
+      }
+    }
+    StraightRoadSegment {
+      translation 8 0 0.001
+      rotation 0 0 1 3.141592653589793
+      name "line_road"
+      width 0.2
+      numberOfLanes 1
+      roadBorderHeight 0
+      startingRoadBorderWidth 0
+      endingRoadBorderWidth 0
+      rightBorder FALSE
+      leftBorder FALSE
+      length 8
+      appearance Asphalt {
+        colorOverride 0 0 0
+        IBLStrength 0
+      }
+    }
+    Pose {
+      translation 6.7 0 0.002
+      children [
+        DEF plane_4 Shape {
+          appearance Appearance {
+            material Material {
+              ambientIntensity 0
+              diffuseColor 0 0 0
+              emissiveColor 1 1 0
+              shininess 0
+            }
+          }
+          geometry Plane {
+            size 0.1 0.1
+          }
+        }
+      ]
+    }
+    Pose {
+      translation 6.8 0 0.002
+      children [
+        DEF plane_3 Shape {
+          appearance Appearance {
+            material Material {
+              ambientIntensity 0
+              diffuseColor 0 0 0
+              emissiveColor 0 1 0
+              shininess 0
+            }
+          }
+          geometry Plane {
+            size 0.1 0.1
+          }
+        }
+      ]
+    }
+    Pose {
+      translation 6.9 0 0.002
+      children [
+        DEF plane_2 Shape {
+          appearance Appearance {
+            material Material {
+              ambientIntensity 0
+              diffuseColor 0 0 0
+              emissiveColor 1 0 0
+              shininess 0
+            }
+          }
+          geometry Plane {
+            size 0.1 0.1
+          }
+        }
+      ]
+    }
+    Pose {
+      translation 7 0 0.002
+      children [
+        DEF plane_1 Shape {
+          appearance Appearance {
+            material Material {
+              ambientIntensity 0
+              diffuseColor 0 0 0
+              emissiveColor 0 0 1
+              shininess 0
+            }
+          }
+          geometry Plane {
+            size 0.1 0.1
+          }
+        }
+      ]
+    }
+  ]
+}
+Pose {
+  rotation 0 0 1 3.141592653589793
+  children [
+    Pose {
+      translation 6 4.5 0.001
+      children [
+        Shape {
+          appearance Appearance {
+            material Material {
+              diffuseColor 0 0 0
+              emissiveColor 1 0 0
+            }
+          }
+          geometry Plane {
+          }
+        }
+      ]
+    }
+    Pose {
+      translation 6 -4.5 0.001
+      children [
+        Shape {
+          appearance Appearance {
+            material Material {
+              diffuseColor 0 0 0
+              emissiveColor 0 1 0
+            }
+          }
+          geometry Plane {
+          }
+        }
+      ]
+    }
+    Pose {
+      translation 3 -4.5 0.001
+      children [
+        Shape {
+          appearance Appearance {
+            material Material {
+              diffuseColor 0 0 0
+              emissiveColor 0 0 1
+            }
+          }
+          geometry Plane {
+          }
+        }
+      ]
+    }
+    Pose {
+      translation 3 4.5 0.001
+      children [
+        Shape {
+          appearance Appearance {
+            material Material {
+              diffuseColor 0 0 0
+              emissiveColor 1 1 0
+            }
+          }
+          geometry Plane {
+          }
+        }
+      ]
+    }
+    StraightRoadSegment {
+      translation 3 0 0.001
+      rotation 0 0 1 -1.5707996938995747
+      name "cross_road_4(1)"
+      width 0.2
+      numberOfLanes 1
+      roadBorderHeight 0
+      startingRoadBorderWidth 0
+      endingRoadBorderWidth 0
+      rightBorder FALSE
+      leftBorder FALSE
+      length 4
+      appearance Asphalt {
+        colorOverride 0 0 0
+        IBLStrength 0
+      }
+    }
+    StraightRoadSegment {
+      translation 3 0 0.001
+      rotation 0 0 1 1.5707996938995747
+      name "cross_road_3(1)"
+      width 0.2
+      numberOfLanes 1
+      roadBorderHeight 0
+      startingRoadBorderWidth 0
+      endingRoadBorderWidth 0
+      rightBorder FALSE
+      leftBorder FALSE
+      length 4
+      appearance Asphalt {
+        colorOverride 0 0 0
+        IBLStrength 0
+      }
+    }
+    StraightRoadSegment {
+      translation 6 0 0.001
+      rotation 0 0 1 -1.5707996938995747
+      name "cross_road_2(1)"
+      width 0.2
+      numberOfLanes 1
+      roadBorderHeight 0
+      startingRoadBorderWidth 0
+      endingRoadBorderWidth 0
+      rightBorder FALSE
+      leftBorder FALSE
+      length 4
+      appearance Asphalt {
+        colorOverride 0 0 0
+        IBLStrength 0
+      }
+    }
+    StraightRoadSegment {
+      translation 6 0 0.001
+      rotation 0 0 1 1.5708003061004252
+      name "cross_road_1(1)"
+      width 0.2
+      numberOfLanes 1
+      roadBorderHeight 0
+      startingRoadBorderWidth 0
+      endingRoadBorderWidth 0
+      rightBorder FALSE
+      leftBorder FALSE
+      length 4
+      appearance Asphalt {
+        colorOverride 0 0 0
+        IBLStrength 0
+      }
+    }
+    StraightRoadSegment {
+      translation 8 0 0.001
+      rotation 0 0 1 3.141592653589793
+      name "line_road(1)"
+      width 0.2
+      numberOfLanes 1
+      roadBorderHeight 0
+      startingRoadBorderWidth 0
+      endingRoadBorderWidth 0
+      rightBorder FALSE
+      leftBorder FALSE
+      length 8
+      appearance Asphalt {
+        colorOverride 0 0 0
+        IBLStrength 0
+      }
+    }
+    Pose {
+      translation 6.7 0 0.002
+      children [
+        DEF plane_8 Shape {
+          appearance Appearance {
+            material Material {
+              ambientIntensity 0
+              diffuseColor 0 0 0
+              emissiveColor 1 1 0
+              shininess 0
+            }
+          }
+          geometry Plane {
+            size 0.1 0.1
+          }
+        }
+      ]
+    }
+    Pose {
+      translation 6.8 0 0.002
+      children [
+        DEF palne_7 Shape {
+          appearance Appearance {
+            material Material {
+              ambientIntensity 0
+              diffuseColor 0 0 0
+              emissiveColor 0 0 1
+              shininess 0
+            }
+          }
+          geometry Plane {
+            size 0.1 0.1
+          }
+        }
+      ]
+    }
+    Pose {
+      translation 6.9 0 0.002
+      children [
+        DEF plane_6 Shape {
+          appearance Appearance {
+            material Material {
+              ambientIntensity 0
+              diffuseColor 0 0 0
+              emissiveColor 0 1 0
+              shininess 0
+            }
+          }
+          geometry Plane {
+            size 0.1 0.1
+          }
+        }
+      ]
+    }
+    Pose {
+      translation 7 0 0.002
+      children [
+        DEF plane_5 Shape {
+          appearance Appearance {
+            material Material {
+              ambientIntensity 0
+              diffuseColor 0 0 0
+              emissiveColor 1 0 0
+              shininess 0
+            }
+          }
+          geometry Plane {
+            size 0.1 0.1
+          }
+        }
+      ]
+    }
+  ]
+}
+Youbot {
+  translation 7.70057 -0.00981428 0.104836
+  rotation -0.001054979456618509 -2.034268245579892e-05 0.9999994433021058 -3.1415250266790076
+  name "youBot(1)"
+  controller "project_cont_test_youbot"
+  supervisor TRUE
+  bodySlot [
+    DistanceSensor {
+      translation 0.23 0.07 -0.094
+      rotation 0 1 0 1.5707996938995747
+      name "inf1"
+      type "infra-red"
+    }
+    DistanceSensor {
+      translation 0.23 -0.07 -0.094
+      rotation 0 1 0 1.5707996938995747
+      name "inf2"
+      type "infra-red"
+    }
+    DistanceSensor {
+      translation -0.23 -0.07 -0.094
+      rotation 0 1 0 1.5707996938995747
+      name "inf3"
+      type "infra-red"
+    }
+    DistanceSensor {
+      translation -0.23 0.07 -0.094
+      rotation 0 1 0 1.5707996938995747
+      name "inf4"
+      type "infra-red"
+    }
+    Camera {
+      translation 0.231096 0 -0.04975
+      rotation 0 1 0 1.57
+      name "cam"
+      fieldOfView 0.0001
+      width 1
+      height 1
+    }
+  ]
+}
+KukaBox {
+  translation -0.0073709999999999965 0.007100679999999988 0.5124917228125002
+  rotation -6.947528971876616e-17 7.263325743325494e-16 -1 1.5707963267948966
+}
+Youbot {
+  translation -7.699690043216052 0.00010762669056377893 0.1019377173650211
+  rotation -0.019087465915952073 0.9997303099664213 -0.01322784862895866 0.002110529898333636
+  controller "<none>"
+  controllerArgs [
+    "demo"
+  ]
+  bodySlot [
+    Camera {
+      translation 0.231096 0 -0.04975
+      rotation 0 1 0 1.57
+      name "cam"
+      fieldOfView 1e-05
+      width 1
+      height 1
+    }
+  ]
+}
+Wall {
+  size 0.2 10 0.5
+}
+Pose {
+  translation 3 4.5 0.014
+  children [
+    KukaBox {
+      translation -0.26 -0.41 -0.00150828
+      rotation 0.11854692962992092 0.43467207530975555 -0.8927523802383441 1.5983380038678122e-16
+      name "Kuka box(1)"
+      color 1 1 0
+    }
+  ]
+}
