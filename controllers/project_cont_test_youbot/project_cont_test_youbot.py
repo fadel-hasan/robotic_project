@@ -11,8 +11,11 @@ from time import time
 
 
 YOUBOT_MAX_VELOCITY = 12
-YOUBOT_WHEEL_RADUIS =  0.067
-YOUBOT_RADUIS = 0.5
+YOUBOT_WHEEL_RADIUS =  0.05
+LX = 0.228  
+LY = 0.158
+YOUBOT_RADIUS = LX + LY #math.sqrt((LX**2) + (LY**2))
+# YOUBOT_RADUIS = 0.277
 # PID Factors
 Kp = 0.01
 Kd = 0.01
@@ -48,6 +51,9 @@ class RobotController(Supervisor):
         
         self.plane_colors_1 = ['r','g','b','y']
         self.plane_colors_2 = ['r','g','b','y']
+        # توابع لتغير مصفوات الالوان حسب الملف النصي color.txt
+        # self.read_colors_from_file()
+        # self.change_plane_color()
         
         self.sensors = list(map(lambda v: self.getDevice(f"inf{v}"), range(1,5)))
         self.weights = [-1000,1000,1000,-1000]
@@ -88,7 +94,6 @@ class RobotController(Supervisor):
         # plane_node = self.getFromDef("plane_1")
         # color_field = plane_node.getField("appearance").getSFNode().getField("material").getSFNode().getField("emissiveColor").getSFColor()
         # print(color_field)
-        # self.change_plane_color()
         # print(color_field)
         # color_field.setSFColor([1, 0, 0]) 
         # print(color_field)
@@ -110,7 +115,22 @@ class RobotController(Supervisor):
             color = dict_map[self.plane_colors_1[index]]
             self.getFromDef(p).getField("appearance").getSFNode().getField("material").getSFNode().getField("emissiveColor").setSFColor(color)
             
-    
+        for index,p in enumerate([f'plane_{i}' for i in range(5,9)]) :
+            color = dict_map[self.plane_colors_2[index]]
+            self.getFromDef(p).getField("appearance").getSFNode().getField("material").getSFNode().getField("emissiveColor").setSFColor(color)
+            
+            
+    def read_colors_from_file(self):
+        try:
+            with open("color.txt", "r") as file:
+                lines = file.read().strip().splitlines()
+                self.plane_colors_1 = lines[0].split(',')
+                self.plane_colors_2 = lines[1].split(',')
+        except FileNotFoundError:
+            pass
+        
+        
+        
     def get_sensors_value(self):
         value = 0
 
@@ -193,11 +213,10 @@ class RobotController(Supervisor):
         if green != 0 and red != 0 and blue == 0 : self.color.append('yellow') if 'yellow' not in self.color else ...
         if len(r.color) == 4:self.camera.disable()
     
-    def run_motors_for_rotations_by_right_motor(
+    def run_motors_for_rotations_by_motor(
         self,
         rotations,
-        left_velocity,
-        right_velocity
+        velocity,
     ):
         """
             A funtion that will run two motors for specafic velocity
@@ -208,28 +227,35 @@ class RobotController(Supervisor):
         # calculate angle = number_of_rotations / 2 * PI
         angle = rotations * 2 * math.pi
         print('angle: ',angle)
-        # get first value of the sensor
-        curr = self.b_left_w_sensor.getValue()
-        print('curr: ',curr)
-        print('sesor live: ',self.b_left_w_sensor.getValue())
-        # set motors velocities
-        self.turn_cw(right_velocity)
+        
+        curr_front_left = self.f_left_w_sensor.getValue()
+        curr_back_left = self.b_left_w_sensor.getValue()
 
-        # do stepping until the differance between initial sensor value
-        # and current value is less than the required angle
-        while(self.b_left_w_sensor.getValue() - curr < angle):
+        self.turn_cw(velocity)
+
+        while True:
+            current_front_left = self.f_left_w_sensor.getValue()
+            current_back_left = self.b_left_w_sensor.getValue()
+            
+            
+            diff_front_left = current_front_left - curr_front_left
+            diff_back_left = current_back_left - curr_back_left
+
+        
+            avg_angle = (diff_front_left + diff_back_left) /2
+            
+            if abs(avg_angle) >= angle:
+                break
             print('move')
-            print('sesor live move: ',self.b_left_w_sensor.getValue())
+            print('sesor live move: ',avg_angle)
             self.step(self.timestep)
 
-        # reset motors velocities to zero
         self.set_motors_velocity(0,0,0,0)
     
-    def move_distance_by_right_motor(
+    def move_distance_by_motor(
         self,
         distance,
-        left_velocity = YOUBOT_MAX_VELOCITY,
-        right_velocity = YOUBOT_MAX_VELOCITY
+        velocity = YOUBOT_MAX_VELOCITY
     ):
         """
             A funtion that will move the robot by specafic distance,
@@ -237,31 +263,35 @@ class RobotController(Supervisor):
             and will depend on right motor sensor to calculate the distance
         """
 
-        rotations = distance / (2 * math.pi * YOUBOT_WHEEL_RADUIS)
-        self.run_motors_for_rotations_by_right_motor(
+        rotations = distance / (2 * math.pi * YOUBOT_WHEEL_RADIUS)
+        self.run_motors_for_rotations_by_motor(
             rotations,
-            left_velocity,
-            right_velocity
+            velocity
         )
     
-    def turn_angle(self, angle):
+    def turn_angle(self, angle,clockwise=True,velocity = YOUBOT_MAX_VELOCITY):
         """
             A funtion that will turn the robot by specafic angle (in degrees) counterclockwise
         """
-        distance = (2 * math.pi * YOUBOT_RADUIS) / (360 / angle)
-        self.move_distance_by_right_motor(
+        distance = (2 * math.pi * YOUBOT_RADIUS) / (360 / angle)
+        
+        if not clockwise:
+            velocity = -velocity 
+        self.move_distance_by_motor(
             distance,
-            -2,
-            2
+            velocity
         )
+    
+
     def loop(self):
         while(self.step(self.timestep) != -1):
             # pass
             # print(dir(self.camera))
             # self.move_forward(2)
             # self.PID_step(2)
-            self.turn_angle(98)
-            break
+            st=self.turn_angle(90,clockwise=False)
+            if not st:
+                break
             # self.read_array_color() if len(r.color) != 4 else ...
 
 

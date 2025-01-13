@@ -44,8 +44,8 @@ WorldInfo {
 }
 Viewpoint {
   fieldOfView 0.785399
-  orientation -0.2964976644387036 -0.0028639610851621624 0.9550292836920221 3.160051503479333
-  position 13.245461166784288 1.0204446490781662 6.81987246239739
+  orientation 0.023832342629621354 -0.9984723707346641 -0.04984921588434469 5.389945559759346
+  position 3.50654408925609 -0.13934463867558333 4.513733751162033
   follow "youBot"
 }
 TexturedBackground {
@@ -212,7 +212,7 @@ Pose {
             material Material {
               ambientIntensity 0
               diffuseColor 0 0 0
-              emissiveColor 1 1 0
+              emissiveColor 1 0 0
               shininess 0
             }
           }
@@ -230,7 +230,7 @@ Pose {
             material Material {
               ambientIntensity 0
               diffuseColor 0 0 0
-              emissiveColor 0 1 0
+              emissiveColor 1 1 0
               shininess 0
             }
           }
@@ -248,7 +248,7 @@ Pose {
             material Material {
               ambientIntensity 0
               diffuseColor 0 0 0
-              emissiveColor 1 0 0
+              emissiveColor 0 1 0
               shininess 0
             }
           }
@@ -447,7 +447,7 @@ Pose {
     Pose {
       translation 6.8 0 0.002
       children [
-        DEF palne_7 Shape {
+        DEF plane_7 Shape {
           appearance Appearance {
             material Material {
               ambientIntensity 0
@@ -470,7 +470,7 @@ Pose {
             material Material {
               ambientIntensity 0
               diffuseColor 0 0 0
-              emissiveColor 0 1 0
+              emissiveColor 1 0 0
               shininess 0
             }
           }
@@ -488,7 +488,7 @@ Pose {
             material Material {
               ambientIntensity 0
               diffuseColor 0 0 0
-              emissiveColor 1 0 0
+              emissiveColor 0 1 0
               shininess 0
             }
           }
@@ -501,8 +501,30 @@ Pose {
   ]
 }
 Youbot {
-  translation 7.70057 -0.00981428 0.104836
-  rotation -0.001054979456618509 -2.034268245579892e-05 0.9999994433021058 -3.1415250266790076
+  hidden translation_7 0 0 0.077
+  hidden rotation_7 0 0 1 1.130525871419365e-06
+  hidden translation_8 0.033 0 0.07
+  hidden rotation_8 0 1 0 1.032382731180714e-07
+  hidden translation_9 0 0 0.155
+  hidden rotation_9 0 1 0 1.5769906706002898e-07
+  hidden translation_10 0 0 0.135
+  hidden rotation_10 0 -1 0 0
+  hidden translation_11 0 0 0.081
+  hidden rotation_11 0 0 1 0
+  hidden translation_12 0 -2.9249655260901855e-11 0.09
+  hidden rotation_12 1 0 0 4.71239
+  hidden translation_13 0 -1.2557117056995038e-11 0.09
+  hidden rotation_13 0 -0.7071067811865476 0.7071067811865476 3.14159
+  hidden translation_14 0.228 -0.158 -0.055
+  hidden rotation_14 0 1 0 4.2146848510894035e-08
+  hidden translation_15 0.228 0.158 -0.055
+  hidden rotation_15 0 1 0 4.2146848510894035e-08
+  hidden translation_16 -0.228 -0.158 -0.055
+  hidden rotation_16 0 -1 0 2.9802322387695313e-08
+  hidden translation_17 -0.228 0.158 -0.055
+  hidden rotation_17 0 -1 0 2.9802322387695313e-08
+  translation 7.70059165299443 -0.009815118817620093 0.10198565762559741
+  rotation -0.0009271657281273555 -2.0453548318397108e-05 0.99999956997259 -3.14152713328957
   name "youBot(1)"
   controller "project_cont_test_youbot"
   supervisor TRUE
@@ -542,12 +564,34 @@ Youbot {
   ]
 }
 KukaBox {
-  translation -0.0073709999999999965 0.007100679999999988 0.5124917228125002
-  rotation -6.947528971876616e-17 7.263325743325494e-16 -1 1.5707963267948966
+  translation -0.0073709999999999965 0.007100679999999987 0.5124917228125002
+  rotation -3.789561257387286e-17 7.326485097615282e-16 -1 1.5707963267948966
 }
 Youbot {
-  translation -7.699690043216052 0.00010762669056377893 0.1019377173650211
-  rotation -0.019087465915952073 0.9997303099664213 -0.01322784862895866 0.002110529898333636
+  hidden translation_3 0 0 0.077
+  hidden rotation_3 0 0 1 1.106705941416465e-06
+  hidden translation_4 0.033 0 0.07
+  hidden rotation_4 0 1 0 1.032382731180714e-07
+  hidden translation_5 0 0 0.155
+  hidden rotation_5 0 -0.9999999999999999 0 1.5769906706002898e-07
+  hidden translation_6 0 0 0.135
+  hidden rotation_6 0 -1 0 0
+  hidden translation_7 0 0 0.081
+  hidden rotation_7 0 0 1 0
+  hidden translation_8 0 2.596934519463729e-12 0.09
+  hidden rotation_8 1 0 0 4.71239
+  hidden translation_9 0 1.9091611282274623e-11 0.09
+  hidden rotation_9 0 -0.7071067811865476 0.7071067811865476 3.14159
+  hidden translation_10 0.228 -0.158 -0.055
+  hidden rotation_10 0 1 0 0
+  hidden translation_11 0.228 0.158 -0.055
+  hidden rotation_11 0 1 0 0
+  hidden translation_12 -0.228 -0.158 -0.055
+  hidden rotation_12 0 1 0 0
+  hidden translation_13 -0.228 0.158 -0.055
+  hidden rotation_13 0 1 0 0
+  translation -7.699690013787329 0.00010762705857124039 0.10193765493843251
+  rotation -0.019086846590071965 0.9997303449403249 -0.013226098923950798 0.002110809274671536
   controller "<none>"
   controllerArgs [
     "demo"
@@ -570,8 +614,8 @@ Pose {
   translation 3 4.5 0.014
   children [
     KukaBox {
-      translation -0.26 -0.41 -0.00150828
-      rotation 0.11854692962992092 0.43467207530975555 -0.8927523802383441 1.5983380038678122e-16
+      translation -0.2599999999999998 -0.41000000000000014 -0.0015082773111491851
+      rotation -0.11896006770288911 0.43618691491057265 -0.8919582263497102 1.5927871135935208e-16
       name "Kuka box(1)"
       color 1 1 0
     }
