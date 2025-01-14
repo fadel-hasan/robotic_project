@@ -44,8 +44,8 @@ WorldInfo {
 }
 Viewpoint {
   fieldOfView 0.785399
-  orientation 0.023832342629621354 -0.9984723707346641 -0.04984921588434469 5.389945559759346
-  position 3.50654408925609 -0.13934463867558333 4.513733751162033
+  orientation -0.2239067393819225 -0.40394522699376145 0.8869577361116564 5.166078489107439
+  position 5.582962315389088 3.1565592119692214 1.9107632870780118
   follow "youBot"
 }
 TexturedBackground {
@@ -501,61 +501,63 @@ Pose {
   ]
 }
 Youbot {
-  hidden translation_7 0 0 0.077
-  hidden rotation_7 0 0 1 1.130525871419365e-06
-  hidden translation_8 0.033 0 0.07
-  hidden rotation_8 0 1 0 1.032382731180714e-07
-  hidden translation_9 0 0 0.155
-  hidden rotation_9 0 1 0 1.5769906706002898e-07
-  hidden translation_10 0 0 0.135
-  hidden rotation_10 0 -1 0 0
-  hidden translation_11 0 0 0.081
-  hidden rotation_11 0 0 1 0
-  hidden translation_12 0 -2.9249655260901855e-11 0.09
-  hidden rotation_12 1 0 0 4.71239
-  hidden translation_13 0 -1.2557117056995038e-11 0.09
-  hidden rotation_13 0 -0.7071067811865476 0.7071067811865476 3.14159
-  hidden translation_14 0.228 -0.158 -0.055
-  hidden rotation_14 0 1 0 4.2146848510894035e-08
-  hidden translation_15 0.228 0.158 -0.055
-  hidden rotation_15 0 1 0 4.2146848510894035e-08
-  hidden translation_16 -0.228 -0.158 -0.055
-  hidden rotation_16 0 -1 0 2.9802322387695313e-08
-  hidden translation_17 -0.228 0.158 -0.055
-  hidden rotation_17 0 -1 0 2.9802322387695313e-08
-  translation 7.70059165299443 -0.009815118817620093 0.10198565762559741
-  rotation -0.0009271657281273555 -2.0453548318397108e-05 0.99999956997259 -3.14152713328957
+  translation 7.6791 -0.00982973 0.102483
+  rotation -0.0010452076914875938 -2.0163961937339926e-05 0.9999994535669989 3.1414636518400854
   name "youBot(1)"
   controller "project_cont_test_youbot"
   supervisor TRUE
   bodySlot [
     DistanceSensor {
-      translation 0.23 0.07 -0.094
+      translation 0.23 0.08 -0.094
       rotation 0 1 0 1.5707996938995747
       name "inf1"
       type "infra-red"
     }
     DistanceSensor {
-      translation 0.23 -0.07 -0.094
+      translation 0.23 -0.08 -0.094
       rotation 0 1 0 1.5707996938995747
       name "inf2"
       type "infra-red"
     }
     DistanceSensor {
-      translation -0.23 -0.07 -0.094
+      translation -0.23 -0.08 -0.094
       rotation 0 1 0 1.5707996938995747
       name "inf3"
       type "infra-red"
     }
     DistanceSensor {
-      translation -0.23 0.07 -0.094
+      translation -0.23 0.08 -0.094
       rotation 0 1 0 1.5707996938995747
       name "inf4"
       type "infra-red"
     }
+    DistanceSensor {
+      translation -0.12 -0.08 -0.094
+      rotation 0 1 0 1.5707996938995747
+      name "inf5"
+      type "infra-red"
+    }
+    DistanceSensor {
+      translation -0.12 0.08 -0.094
+      rotation 0 1 0 1.5707996938995747
+      name "inf6"
+      type "infra-red"
+    }
+    DistanceSensor {
+      translation 0.12 0.08 -0.094
+      rotation 0 1 0 1.5707996938995747
+      name "inf7"
+      type "infra-red"
+    }
+    DistanceSensor {
+      translation 0.12 -0.08 -0.094
+      rotation 0 1 0 1.5707996938995747
+      name "inf8"
+      type "infra-red"
+    }
     Camera {
-      translation 0.231096 0 -0.04975
-      rotation 0 1 0 1.57
+      translation 0.23 0 -0.0800001
+      rotation 0 1 0 1.5708003061004252
       name "cam"
       fieldOfView 0.0001
       width 1
@@ -565,33 +567,11 @@ Youbot {
 }
 KukaBox {
   translation -0.0073709999999999965 0.007100679999999987 0.5124917228125002
-  rotation -3.789561257387286e-17 7.326485097615282e-16 -1 1.5707963267948966
+  rotation -8.842309600570207e-17 6.315935428978697e-16 -1 1.5707963267948966
 }
 Youbot {
-  hidden translation_3 0 0 0.077
-  hidden rotation_3 0 0 1 1.106705941416465e-06
-  hidden translation_4 0.033 0 0.07
-  hidden rotation_4 0 1 0 1.032382731180714e-07
-  hidden translation_5 0 0 0.155
-  hidden rotation_5 0 -0.9999999999999999 0 1.5769906706002898e-07
-  hidden translation_6 0 0 0.135
-  hidden rotation_6 0 -1 0 0
-  hidden translation_7 0 0 0.081
-  hidden rotation_7 0 0 1 0
-  hidden translation_8 0 2.596934519463729e-12 0.09
-  hidden rotation_8 1 0 0 4.71239
-  hidden translation_9 0 1.9091611282274623e-11 0.09
-  hidden rotation_9 0 -0.7071067811865476 0.7071067811865476 3.14159
-  hidden translation_10 0.228 -0.158 -0.055
-  hidden rotation_10 0 1 0 0
-  hidden translation_11 0.228 0.158 -0.055
-  hidden rotation_11 0 1 0 0
-  hidden translation_12 -0.228 -0.158 -0.055
-  hidden rotation_12 0 1 0 0
-  hidden translation_13 -0.228 0.158 -0.055
-  hidden rotation_13 0 1 0 0
-  translation -7.699690013787329 0.00010762705857124039 0.10193765493843251
-  rotation -0.019086846590071965 0.9997303449403249 -0.013226098923950798 0.002110809274671536
+  translation -7.699690040265291 0.00010762668324848722 0.10193771106250575
+  rotation -0.019087694338041174 0.9997303078170667 -0.013227681461636897 0.002110557206664199
   controller "<none>"
   controllerArgs [
     "demo"
@@ -614,8 +594,8 @@ Pose {
   translation 3 4.5 0.014
   children [
     KukaBox {
-      translation -0.2599999999999998 -0.41000000000000014 -0.0015082773111491851
-      rotation -0.11896006770288911 0.43618691491057265 -0.8919582263497102 1.5927871135935208e-16
+      translation -0.2599999999999998 -0.41000000000000014 -0.0015082771877389465
+      rotation 0.5702149732111267 -0.1315880707410188 -0.8108880711691908 1.4399334362326576e-16
       name "Kuka box(1)"
       color 1 1 0
     }
