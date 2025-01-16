@@ -45,7 +45,7 @@ class RobotController(Supervisor):
         self.plane_colors_2 = ['r','g','b','y']
         # توابع لتغير مصفوات الالوان حسب الملف النصي color.txt
         # self.read_colors_from_file()
-        # self.change_plane_color()
+        self.change_plane_color()
         
         self.sensors = list(map(lambda v: self.getDevice(f"inf{v}"), range(1,9)))
         # self.weights = [-1000,1000,1000,-1000,1000,-1000,-1000,1000]
@@ -67,7 +67,7 @@ class RobotController(Supervisor):
         self.current_direction = 0
         
         for sensor in self.sensors:
-            print("enabled: ", sensor)
+            # print("enabled: ", sensor)
             sensor.enable(self.timestep)
             
             
@@ -190,7 +190,7 @@ class RobotController(Supervisor):
     def PID_step(self, velocity = YOUBOT_MAX_VELOCITY):
         global last_error, integral
         value = self.get_sensors_value()
-        print('value',value)
+        # print('value',value)
         error = 0 - value
         # print('error',error)
         # Get P term of the PID.
@@ -207,7 +207,7 @@ class RobotController(Supervisor):
         integral += error
 
         PID = P + D + I
-        print('pid',PID)
+        # print('pid',PID)
         # self.run_motors_stearing(steering,velocity)
         self.run_motors_speed(PID,velocity)
     
@@ -311,7 +311,7 @@ class RobotController(Supervisor):
             velocity
         )
     
-    def turn_angle(self, angle,clockwise=True,velocity = YOUBOT_MAX_VELOCITY):
+    def turn_angle(self, angle,clockwise=True,direc = True,velocity = YOUBOT_MAX_VELOCITY):
         """
             A funtion that will turn the robot by specafic angle (in degrees) counterclockwise
         """
@@ -320,18 +320,19 @@ class RobotController(Supervisor):
         distance = (2 * math.pi * YOUBOT_RADIUS) / (360 / (abs(angle) + self.rotate_err))
         
         
-        if clockwise:
+        if clockwise and direc:
             self.current_direction += angle  
-        else:
+        elif (not clockwise) and direc:
+            print('enter to danger')
             self.current_direction -= angle  
             velocity = -velocity
         self.move_distance_by_motor(
             distance,
             velocity
         )
-        
-        self.current_direction = self.current_direction % 360
-        print('curr direc in turn', self.current_direction)
+        if direc:
+            self.current_direction = self.current_direction % 360
+            print('curr direc in turn', self.current_direction)
 
 
     def move_distance_PID(
@@ -340,7 +341,7 @@ class RobotController(Supervisor):
         velocity=YOUBOT_MAX_VELOCITY
     ):
     
-        rotations = distance / (2 * math.pi * YOUBOT_WHEEL_RADIUS)
+        rotations = abs(distance) / (2 * math.pi * YOUBOT_WHEEL_RADIUS)
 
         angle = rotations * 2 * math.pi
         # print('angle:',angle)
@@ -351,7 +352,10 @@ class RobotController(Supervisor):
         
 
         while True:
-            self.PID_step(velocity)
+            if distance < 0:
+                self.PID_step(-velocity)
+            else:
+                self.PID_step(velocity)
             current_right_sensor = self.f_right_w_sensor.getValue()
             current_left_sensor = self.f_left_w_sensor.getValue()
             # print('current_right_sensor:',current_right_sensor)
@@ -375,10 +379,10 @@ class RobotController(Supervisor):
         dx = pos2[0] - pos1[0]
         dy = pos2[1] - pos1[1]
         target_angle = math.degrees(math.atan2(dy, dx))
-        # print('target:', target_angle)
-        # print('curr direc',self.current_direction)
+        print('target:', target_angle)
+        print('curr direc',self.current_direction)
         angle_diff = target_angle - self.current_direction
-        # print('angle_diff befor norm',angle_diff)
+        print('angle_diff befor norm',angle_diff)
         # تطبيع الفرق بين -180 و 180 درجة
         angle_diff = (angle_diff + 180) % 360 - 180
         print('angle_diff',angle_diff)
@@ -423,21 +427,7 @@ class RobotController(Supervisor):
             self.move_to_position("intersection_blue_yellow")
         self.move_to_position("wall")
         
-    def process_colors(self):
-        while not self.color_queue.empty():  
-            color = self.color_queue.get()  
-            if color == 'red':
-                self.go_to_red_area()
-                self.go_to_wall()
-            elif color == 'green':
-                self.go_to_green_area()
-                self.go_to_wall()
-            elif color == 'blue':
-                self.go_to_blue_area()
-                self.go_to_wall()
-            elif color == 'yellow':
-                self.go_to_yellow_area()
-                self.go_to_wall()
+    
         
     def fold_arms(self):
         self.armMotors[0].setPosition(-2.9)
@@ -453,57 +443,160 @@ class RobotController(Supervisor):
         self.armMotors[3].setPosition(-1.7)
         self.armMotors[4].setPosition(0)
         
-    def pick_up(self):
+    def pick_up(self,ang = 0):
         self.armMotors[1].setPosition(-1.13)
-        self.armMotors[2].setPosition(-0.9)
-        self.armMotors[3].setPosition(-0.6)
-        self.armMotors[4].setPosition(-1.3)
+        self.armMotors[3].setPosition(-0.5)
+        self.armMotors[2].setPosition(-1.15)
+        self.armMotors[4].setPosition(ang)
         self.finger1.setPosition(self.fingerMaxPosition)
         self.finger2.setPosition(self.fingerMaxPosition)
 
         # Monitor the arm joint position to 
         # detect when the motion is completed.
-        print(self.armPositionSensors[0].getValue())
-        print(self.armPositionSensors[1].getValue())
-        print(self.armPositionSensors[2].getValue())
-        print(self.armPositionSensors[3].getValue())
-        print(self.armPositionSensors[4].getValue())
+        # print(self.armPositionSensors[0].getValue())
+        # print(self.armPositionSensors[1].getValue())
+        # print(self.armPositionSensors[2].getValue())
+        # print(self.armPositionSensors[3].getValue())
+        # print(self.armPositionSensors[4].getValue())
         
         while self.step(self.timestep) != -1:
-            if abs(self.armPositionSensors[3].getValue() - (-1.2)) < 0.01:
+            # print('arm sensor 1',self.armPositionSensors[0].getValue())
+            # print('arm sensor 2',self.armPositionSensors[1].getValue())
+            # print('arm sensor 3',self.armPositionSensors[2].getValue())
+            # print('arm sensor 4',self.armPositionSensors[3].getValue())
+            # print('arm sensor 5',self.armPositionSensors[4].getValue())
+            if abs(self.armPositionSensors[3].getValue() - (-0.5)) < 0.01:
                 
             # Motion completed.
                 break
-        self.finger1.setPosition(0.013)     # Close gripper.
-        self.finger2.setPosition(0.013)
-        # self.step(50 * self.timestep)    # Wait until the gripper is closed.
+        self.finger1.setPosition(0.001)     # Close gripper.
+        self.finger2.setPosition(0.001)
+        self.step(50 * self.timestep)    # Wait until the gripper is closed.
+        print('pick')
         self.armMotors[1].setPosition(0)    # Lift arm.
+        self.armMotors[2].setPosition(-0.5)
+        print('after pick')
         # Wait until the arm is lifted.
-        # robot.step(200 * timestep)
+        self.step(100 * self.timestep)
+        
+        
     def hand_up(self):
+        self.finger1.setPosition(self.fingerMaxPosition)
+        self.finger2.setPosition(self.fingerMaxPosition)
         self.armMotors[0].setPosition(0)
         self.armMotors[1].setPosition(0)
         self.armMotors[2].setPosition(0)
         self.armMotors[3].setPosition(0)
         self.armMotors[4].setPosition(0)
-        self.finger1.setPosition(self.fingerMaxPosition)
-        self.finger2.setPosition(self.fingerMaxPosition)
+    
+    def halt(self):
+        self.front_right_wheel.setVelocity(0)
+        self.front_left_wheel.setVelocity(0)
+        self.back_right_wheel.setVelocity(0)
+        self.back_left_wheel.setVelocity(0)
+        
+        
+        
+    def pick_up_cubes(self):
+        while True:
+            distance = self.dis_arm_sensor.getValue()
+            print(distance)
+            if distance < 450:  
+                self.pick_up()  
+
+            else:
+                self.rotate_err = 0
+                for angle in range(0, 40, 1):  
+                    self.turn_angle(1, True, False,velocity=2)  
+                    distance = self.dis_arm_sensor.getValue()  
+                    if distance < 900:
+                        dis = self.calculate_move_distance(distance)
+                        self.move_distance_PID(distance= dis)
+                        print('dis',distance)
+                        print('norm:',dis)
+                        print('factor',angle/100)
+                        self.turn_angle(3, True,False ,velocity=2)
+                        factor = angle/70
+                        self.pick_up(ang= -factor)
+                        self.move_distance_PID(distance= -dis)
+                        self.turn_angle(-angle - 5,False,False,velocity=2)
+                        print(f"Current Angle: {angle}, Distance: {distance}")
+                        return
+                        
+                # 3. الدوران درجة درجة حتى -45 درجة من الموقع الحالي
+                for angle in range(0, -40, -1):  # من 45 إلى -45 درجة (خطوة -1 درجة)
+                    self.turn_angle(-1, False,False,velocity=2)  # دوران -1 درجة إضافية
+                    distance = self.dis_arm_sensor.getValue()  # قراءة الحساس
+                    if distance < 900 and distance > 700:
+                        dis = self.calculate_move_distance(distance)
+                        self.move_distance_PID(distance= dis)
+                        print('dis',distance)
+                        print('norm:',dis)
+                        print('factor',angle/100)
+                        self.turn_angle(-3, False, False,velocity=2)
+                        factor = angle/70
+                        self.pick_up(ang= -factor)
+                        self.move_distance_PID(distance= -dis)
+                        self.turn_angle(angle + 5,True,False,velocity=2)
+                        return
+                    print(f"Current Angle: {angle}, Distance: {distance}")
+            return
+    
+    def calculate_move_distance(self, distance):
+        a = 0.000352  
+        b = -0.1525   
+        move_distance = a * distance + b
+        return max(move_distance, 0)
+    
+    
+    def process_colors(self):
+        while not self.color_queue.empty():  
+            color = self.color_queue.get()  
+            if color == 'red':
+                self.go_to_red_area()
+                self.pick_up_cubes()
+                self.go_to_wall()
+                self.hand_up()
+            elif color == 'green':
+                self.go_to_green_area()
+                self.pick_up_cubes()
+                self.go_to_wall()
+                self.hand_up()
+            elif color == 'blue':
+                self.go_to_blue_area()
+                self.pick_up_cubes()
+                self.go_to_wall()
+                self.hand_up()
+            elif color == 'yellow':
+                self.go_to_yellow_area()
+                self.pick_up_cubes()
+                self.go_to_wall()
+                self.hand_up()
+    
     def loop(self):
 
+        # self.pick_up_cubes()
         while(self.step(self.timestep) != -1):
+            # self.go_to_wall()
             if not self.read_array:
                 self.read_array_color()            
             else:
                 self.process_colors()
-                # pass
+            #     self.go_to_red_area()
+            #     self.halt()
+            #     # self.pick_up()
+            #     break
+            # self.pick_up()
             # self.fold_arms()
             # self.stretch_arms()
             
             # self.hand_up()
-            print(self.dis_arm_sensor.getValue())
+            # print(self.dis_arm_sensor.getValue())
+            
 
 
 
 r = RobotController()
 r.loop()
+# r.pick_up()
 

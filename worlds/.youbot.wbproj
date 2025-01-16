@@ -11,4 +11,7 @@ textFiles: -1
 globalOptionalRendering: DistanceSensorRays::CameraFrustums::CoordinateSystem
 consoles: Console:All:All
 renderingDevicePerspectives: youBot(1):cam;1;32;0;0
+renderingDevicePerspectives: youBot(1):camera;1;1;0;0
+renderingDevicePerspectives: youBot(2):cam;1;32;0;0
+renderingDevicePerspectives: youBot(2):camera;1;1;0;0
 renderingDevicePerspectives: youBot:cam;1;32;0;0

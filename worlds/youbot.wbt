@@ -44,8 +44,8 @@ WorldInfo {
 }
 Viewpoint {
   fieldOfView 0.785399
-  orientation -0.3616227596778389 -0.4438762216784729 0.8198797957697378 4.718743392557963
-  position 6.648499265554959 2.841090825108084 3.619740528021527
+  orientation 0.33312178463289266 0.39132475697772523 -0.8578431157148262 1.5630923064334015
+  position 2.13895696725465 6.653341371769694 2.661790795945797
   follow "youBot"
 }
 TexturedBackground {
@@ -56,6 +56,219 @@ RectangleArena {
   floorSize 16 10
   floorAppearance NULL
   wallHeight 0.5
+}
+DEF kukaBoxRed Pose {
+  children [
+    KukaBox {
+      translation 6.31263 4.1171 0.0249338
+      rotation -4.736951556301705e-18 -4.736951551684923e-18 -1 1.5707963267948966
+      name "Kuka box(6)"
+      color 1 0 0
+      size 0.05 0.05 0.05
+    }
+    KukaBox {
+      translation 6.21263 4.1171 0.0249338
+      rotation -4.736951556301705e-18 -4.736951551684923e-18 -1 1.5707963267948966
+      name "Kuka box(4)"
+      color 1 0 0
+      size 0.05 0.05 0.05
+    }
+    KukaBox {
+      translation 6.10263 4.1171 0.0249338
+      rotation -4.736951556301705e-18 -4.736951551684923e-18 -1 1.5707963267948966
+      name "Kuka box(2)"
+      color 1 0 0
+      size 0.05 0.05 0.05
+    }
+    KukaBox {
+      translation 5.70263 4.1171 0.0249338
+      rotation -4.736951556301705e-18 -4.736951551684923e-18 -1 1.5707963267948966
+      name "Kuka box(7)"
+      color 1 0 0
+      size 0.05 0.05 0.05
+    }
+    KukaBox {
+      translation 5.80263 4.1171 0.0249338
+      rotation -4.736951556301705e-18 -4.736951551684923e-18 -1 1.5707963267948966
+      name "Kuka box(5)"
+      color 1 0 0
+      size 0.05 0.05 0.05
+    }
+    KukaBox {
+      translation 5.90263 4.1171 0.0249338
+      rotation -4.736951556301705e-18 -4.736951551684923e-18 -1 1.5707963267948966
+      name "Kuka box(3)"
+      color 1 0 0
+      size 0.05 0.05 0.05
+    }
+    KukaBox {
+      translation 6.00263 4.1171 0.0249338
+      rotation -4.736951556301705e-18 -4.736951551684923e-18 -1 1.5707963267948966
+      color 1 0 0
+      size 0.05 0.05 0.05
+    }
+  ]
+}
+DEF kukaBoxGreen Pose {
+  children [
+    KukaBox {
+      translation 6.31263 -4.1171 0.0249338
+      rotation -4.736951556301705e-18 -4.736951551684923e-18 -1 1.5707963267948966
+      name "Kuka box(3)"
+      color 0 1 0
+      size 0.05 0.05 0.05
+    }
+    KukaBox {
+      translation 6.21263 -4.1171 0.0249338
+      rotation -4.736951556301705e-18 -4.736951551684923e-18 -1 1.5707963267948966
+      name "Kuka box(3)"
+      color 0 1 0
+      size 0.05 0.05 0.05
+    }
+    KukaBox {
+      translation 6.10263 -4.1171 0.0249338
+      rotation -4.736951556301705e-18 -4.736951551684923e-18 -1 1.5707963267948966
+      name "Kuka box(4)"
+      color 0 1 0
+      size 0.05 0.05 0.05
+    }
+    KukaBox {
+      translation 5.70263 -4.1171 0.0249338
+      rotation -4.736951556301705e-18 -4.736951551684923e-18 -1 1.5707963267948966
+      name "Kuka box(4)"
+      color 0 1 0
+      size 0.05 0.05 0.05
+    }
+    KukaBox {
+      translation 5.80263 -4.1171 0.0249338
+      rotation -4.736951556301705e-18 -4.736951551684923e-18 -1 1.5707963267948966
+      name "Kuka box(4)"
+      color 0 1 0
+      size 0.05 0.05 0.05
+    }
+    KukaBox {
+      translation 5.90263 -4.1171 0.0249338
+      rotation -4.736951556301705e-18 -4.736951551684923e-18 -1 1.5707963267948966
+      name "Kuka box(4)"
+      color 0 1 0
+      size 0.05 0.05 0.05
+    }
+    KukaBox {
+      translation 6.00263 -4.1171 0.0249338
+      rotation -4.736951556301705e-18 -4.736951551684923e-18 -1 1.5707963267948966
+      name "Kuka box(4)"
+      color 0 1 0
+      size 0.05 0.05 0.05
+    }
+  ]
+}
+DEF kukaBoxBlue Pose {
+  translation -3 0 0
+  children [
+    KukaBox {
+      translation 6.31263 -4.1171 0.0249338
+      rotation -4.736951556301705e-18 -4.736951551684923e-18 -1 1.5707963267948966
+      name "Kuka box(4)"
+      color 0 0 1
+      size 0.05 0.05 0.05
+    }
+    KukaBox {
+      translation 6.21263 -4.1171 0.0249338
+      rotation -4.736951556301705e-18 -4.736951551684923e-18 -1 1.5707963267948966
+      name "Kuka box(4)"
+      color 0 0 1
+      size 0.05 0.05 0.05
+    }
+    KukaBox {
+      translation 6.10263 -4.1171 0.0249338
+      rotation -4.736951556301705e-18 -4.736951551684923e-18 -1 1.5707963267948966
+      name "Kuka box(4)"
+      color 0 0 1
+      size 0.05 0.05 0.05
+    }
+    KukaBox {
+      translation 5.70263 -4.1171 0.0249338
+      rotation -4.736951556301705e-18 -4.736951551684923e-18 -1 1.5707963267948966
+      name "Kuka box(4)"
+      color 0 0 1
+      size 0.05 0.05 0.05
+    }
+    KukaBox {
+      translation 5.80263 -4.1171 0.0249338
+      rotation -4.736951556301705e-18 -4.736951551684923e-18 -1 1.5707963267948966
+      name "Kuka box(4)"
+      color 0 0 1
+      size 0.05 0.05 0.05
+    }
+    KukaBox {
+      translation 5.90263 -4.1171 0.0249338
+      rotation -4.736951556301705e-18 -4.736951551684923e-18 -1 1.5707963267948966
+      name "Kuka box(4)"
+      color 0 0 1
+      size 0.05 0.05 0.05
+    }
+    KukaBox {
+      translation 6.00263 -4.1171 0.0249338
+      rotation -4.736951556301705e-18 -4.736951551684923e-18 -1 1.5707963267948966
+      name "Kuka box(4)"
+      color 0 0 1
+      size 0.05 0.05 0.05
+    }
+  ]
+}
+DEF kukaBoxYellow Pose {
+  translation -3 8.24 0
+  children [
+    KukaBox {
+      translation 6.31263 -4.1171 0.0249338
+      rotation -4.736951556301705e-18 -4.736951551684923e-18 -1 1.5707963267948966
+      name "Kuka box(4)"
+      color 1 1 0
+      size 0.05 0.05 0.05
+    }
+    KukaBox {
+      translation 6.21263 -4.1171 0.0249338
+      rotation -4.736951556301705e-18 -4.736951551684923e-18 -1 1.5707963267948966
+      name "Kuka box(4)"
+      color 1 1 0
+      size 0.05 0.05 0.05
+    }
+    KukaBox {
+      translation 6.10263 -4.1171 0.0249338
+      rotation -4.736951556301705e-18 -4.736951551684923e-18 -1 1.5707963267948966
+      name "Kuka box(4)"
+      color 1 1 0
+      size 0.05 0.05 0.05
+    }
+    KukaBox {
+      translation 5.70263 -4.1171 0.0249338
+      rotation -4.736951556301705e-18 -4.736951551684923e-18 -1 1.5707963267948966
+      name "Kuka box(4)"
+      color 1 1 0
+      size 0.05 0.05 0.05
+    }
+    KukaBox {
+      translation 5.80263 -4.1171 0.0249338
+      rotation -4.736951556301705e-18 -4.736951551684923e-18 -1 1.5707963267948966
+      name "Kuka box(4)"
+      color 1 1 0
+      size 0.05 0.05 0.05
+    }
+    KukaBox {
+      translation 5.90263 -4.1171 0.0249338
+      rotation -4.736951556301705e-18 -4.736951551684923e-18 -1 1.5707963267948966
+      name "Kuka box(4)"
+      color 1 1 0
+      size 0.05 0.05 0.05
+    }
+    KukaBox {
+      translation 6.00263 -4.1171 0.0249338
+      rotation -4.736951556301705e-18 -4.736951551684923e-18 -1 1.5707963267948966
+      name "Kuka box(4)"
+      color 1 1 0
+      size 0.05 0.05 0.05
+    }
+  ]
 }
 Pose {
   children [
@@ -212,7 +425,7 @@ Pose {
             material Material {
               ambientIntensity 0
               diffuseColor 0 0 0
-              emissiveColor 1 0 0
+              emissiveColor 1 1 0
               shininess 0
             }
           }
@@ -230,7 +443,7 @@ Pose {
             material Material {
               ambientIntensity 0
               diffuseColor 0 0 0
-              emissiveColor 1 1 0
+              emissiveColor 0 0 1
               shininess 0
             }
           }
@@ -266,7 +479,7 @@ Pose {
             material Material {
               ambientIntensity 0
               diffuseColor 0 0 0
-              emissiveColor 0 0 1
+              emissiveColor 1 0 0
               shininess 0
             }
           }
@@ -470,7 +683,7 @@ Pose {
             material Material {
               ambientIntensity 0
               diffuseColor 0 0 0
-              emissiveColor 1 0 0
+              emissiveColor 0 1 0
               shininess 0
             }
           }
@@ -488,7 +701,7 @@ Pose {
             material Material {
               ambientIntensity 0
               diffuseColor 0 0 0
-              emissiveColor 0 1 0
+              emissiveColor 1 0 0
               shininess 0
             }
           }
@@ -501,8 +714,8 @@ Pose {
   ]
 }
 Youbot {
-  translation 7.66468 0 0.107062
-  rotation 0.0010549704676718705 2.0758909202492577e-05 -0.999999443303035 3.14059
+  translation 7.70018 0.00414582 0.109578
+  rotation -2.0321509008559823e-05 0.0010549804676746521 0.9999994433014696 -3.141495307179586
   name "youBot(1)"
   controller "project_cont_test_youbot"
   supervisor TRUE
@@ -575,13 +788,9 @@ Youbot {
     }
   ]
 }
-KukaBox {
-  translation 7.29263 -0.502899 0.0124917228125
-  rotation 6.315935434839578e-18 1.8947806289087015e-17 -1 1.5707963267948966
-}
 Youbot {
-  translation -7.699690043340006 0.00010762624295917742 0.10193771736395624
-  rotation -0.01908746654381638 0.9997303098025938 -0.013227860104658304 0.002110530084020199
+  translation -7.699690043343289 0.00010762618457157439 0.10193771736395624
+  rotation -0.019087466539686095 0.9997303097671586 -0.013227862788727902 0.002110530084094634
   controller "<none>"
   controllerArgs [
     "demo"
@@ -605,7 +814,7 @@ Pose {
   children [
     KukaBox {
       translation -0.2599999999999998 -0.41000000000000014 -0.0015082771874999987
-      rotation -0.23432136510411672 0.702964095312345 -0.6715169235078441 1.3477079706693427e-16
+      rotation 0.1137798469270428 0.41719277206583744 -0.9016675315044238 1.6653042519107036e-16
       name "Kuka box(1)"
       color 1 1 0
     }
