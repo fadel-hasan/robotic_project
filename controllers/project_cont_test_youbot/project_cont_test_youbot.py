@@ -317,22 +317,34 @@ class RobotController(Supervisor):
         """
         if abs(angle) < 0.001:
             return
+        if not direc:
+            self.rotate_err = 0
+            if clockwise:
+                self.current_direction += angle
+                velocity = +velocity
+            elif not clockwise:
+                self.current_direction -= angle
+                velocity = -velocity
+        else:
+            self.rotate_err = 10
+            if clockwise:
+                self.current_direction += angle
+                velocity = +velocity
+            elif not clockwise:
+                self.current_direction -= angle
+                velocity = -velocity
+        print('eerrr rot',self.rotate_err)
+        print('angle for rotation now from turn angle function',angle)
         distance = (2 * math.pi * YOUBOT_RADIUS) / (360 / (abs(angle) + self.rotate_err))
         
         
-        if clockwise and direc:
-            self.current_direction += angle  
-        elif (not clockwise) and direc:
-            print('enter to danger')
-            self.current_direction -= angle  
-            velocity = -velocity
         self.move_distance_by_motor(
             distance,
             velocity
         )
         if direc:
             self.current_direction = self.current_direction % 360
-            print('curr direc in turn', self.current_direction)
+            # print('curr direc in turn', self.current_direction)
 
 
     def move_distance_PID(
@@ -380,12 +392,12 @@ class RobotController(Supervisor):
         dy = pos2[1] - pos1[1]
         target_angle = math.degrees(math.atan2(dy, dx))
         print('target:', target_angle)
-        print('curr direc',self.current_direction)
+        print('current direc',self.current_direction)
         angle_diff = target_angle - self.current_direction
         print('angle_diff befor norm',angle_diff)
         # تطبيع الفرق بين -180 و 180 درجة
         angle_diff = (angle_diff + 180) % 360 - 180
-        print('angle_diff',angle_diff)
+        print('angle_diff after norm',angle_diff)
         # angle_diff = angle_diff - 15 if abs(angle_diff) > 90 else angle_diff - 10 if abs(angle_diff) == 90 else angle_diff
         return angle_diff#+ (self.rotate_err * angle_diff)
     
@@ -472,10 +484,10 @@ class RobotController(Supervisor):
         self.finger1.setPosition(0.001)     # Close gripper.
         self.finger2.setPosition(0.001)
         self.step(50 * self.timestep)    # Wait until the gripper is closed.
-        print('pick')
+        # print('pick')
         self.armMotors[1].setPosition(0)    # Lift arm.
         self.armMotors[2].setPosition(-0.5)
-        print('after pick')
+        # print('after pick')
         # Wait until the arm is lifted.
         self.step(100 * self.timestep)
         
@@ -505,7 +517,7 @@ class RobotController(Supervisor):
                 self.pick_up()  
 
             else:
-                self.rotate_err = 0
+                # self.rotate_err = 0
                 for angle in range(0, 40, 1):  
                     self.turn_angle(1, True, False,velocity=2)  
                     distance = self.dis_arm_sensor.getValue()  
@@ -519,15 +531,16 @@ class RobotController(Supervisor):
                         factor = angle/70
                         self.pick_up(ang= -factor)
                         self.move_distance_PID(distance= -dis)
-                        self.turn_angle(-angle - 5,False,False,velocity=2)
+                        self.turn_angle(angle + 5,False,False,velocity=2)
                         print(f"Current Angle: {angle}, Distance: {distance}")
                         return
-                        
-                # 3. الدوران درجة درجة حتى -45 درجة من الموقع الحالي
-                for angle in range(0, -40, -1):  # من 45 إلى -45 درجة (خطوة -1 درجة)
-                    self.turn_angle(-1, False,False,velocity=2)  # دوران -1 درجة إضافية
-                    distance = self.dis_arm_sensor.getValue()  # قراءة الحساس
-                    if distance < 900 and distance > 700:
+                else:
+                    self.turn_angle(angle + 2,False,False,velocity=2)
+                print('round2')
+                for angle in range(0, -40, -1):  
+                    self.turn_angle(-1, False,False,velocity=2)  
+                    distance = self.dis_arm_sensor.getValue()
+                    if distance < 900:
                         dis = self.calculate_move_distance(distance)
                         self.move_distance_PID(distance= dis)
                         print('dis',distance)
@@ -537,9 +550,11 @@ class RobotController(Supervisor):
                         factor = angle/70
                         self.pick_up(ang= -factor)
                         self.move_distance_PID(distance= -dis)
-                        self.turn_angle(angle + 5,True,False,velocity=2)
+                        self.turn_angle(angle - 5,True,False,velocity=2)
+                        print(f"Current Angle: {angle}, Distance: {distance}")
                         return
-                    print(f"Current Angle: {angle}, Distance: {distance}")
+                else:
+                    self.turn_angle(angle - 2,True,False,velocity=2)
             return
     
     def calculate_move_distance(self, distance):
@@ -581,7 +596,15 @@ class RobotController(Supervisor):
             if not self.read_array:
                 self.read_array_color()            
             else:
-                self.process_colors()
+                self.go_to_red_area()
+                self.pick_up_cubes()
+                self.go_to_wall()
+                self.hand_up()
+                self.go_to_red_area()
+                self.pick_up_cubes()
+                self.go_to_wall()
+                self.hand_up()
+                # self.process_colors()
             #     self.go_to_red_area()
             #     self.halt()
             #     # self.pick_up()
