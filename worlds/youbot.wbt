@@ -44,8 +44,8 @@ WorldInfo {
 }
 Viewpoint {
   fieldOfView 0.785399
-  orientation -0.2239067393819225 -0.40394522699376145 0.8869577361116564 5.166078489107439
-  position 5.582962315389088 3.1565592119692214 1.9107632870780118
+  orientation -0.3616227596778389 -0.4438762216784729 0.8198797957697378 4.718743392557963
+  position 6.648499265554959 2.841090825108084 3.619740528021527
   follow "youBot"
 }
 TexturedBackground {
@@ -501,56 +501,66 @@ Pose {
   ]
 }
 Youbot {
-  translation 7.6791 -0.00982973 0.102483
-  rotation -0.0010452076914875938 -2.0163961937339926e-05 0.9999994535669989 3.1414636518400854
+  translation 7.66468 0 0.107062
+  rotation 0.0010549704676718705 2.0758909202492577e-05 -0.999999443303035 3.14059
   name "youBot(1)"
   controller "project_cont_test_youbot"
   supervisor TRUE
   bodySlot [
     DistanceSensor {
-      translation 0.23 0.08 -0.094
+      translation 0.27 0 -0.08
+      rotation 0 1 0 0
+      name "dis_arm"
+      translationStep 0.3
+      lookupTable [
+        0 0 0
+        0.5 1000 0
+      ]
+    }
+    DistanceSensor {
+      translation 0.23 0.06 -0.094
       rotation 0 1 0 1.5707996938995747
       name "inf1"
       type "infra-red"
     }
     DistanceSensor {
-      translation 0.23 -0.08 -0.094
+      translation 0.23 -0.06 -0.094
       rotation 0 1 0 1.5707996938995747
       name "inf2"
       type "infra-red"
     }
     DistanceSensor {
-      translation -0.23 -0.08 -0.094
+      translation 0.23 -0.08 -0.094
       rotation 0 1 0 1.5707996938995747
       name "inf3"
       type "infra-red"
     }
     DistanceSensor {
-      translation -0.23 0.08 -0.094
+      translation 0.23 0.08 -0.094
       rotation 0 1 0 1.5707996938995747
       name "inf4"
       type "infra-red"
     }
     DistanceSensor {
-      translation -0.12 -0.08 -0.094
+      translation 0.23 -0.1 -0.094
       rotation 0 1 0 1.5707996938995747
       name "inf5"
       type "infra-red"
     }
     DistanceSensor {
-      translation -0.12 0.08 -0.094
+      translation 0.23 0.1 -0.094
       rotation 0 1 0 1.5707996938995747
       name "inf6"
       type "infra-red"
     }
     DistanceSensor {
-      translation 0.12 0.08 -0.094
+      translation 0.23 0.11 -0.094
       rotation 0 1 0 1.5707996938995747
       name "inf7"
       type "infra-red"
     }
     DistanceSensor {
-      translation 0.12 -0.08 -0.094
+      translation 0.23 -0.11 -0.094
       rotation 0 1 0 1.5707996938995747
       name "inf8"
       type "infra-red"
@@ -566,12 +576,12 @@ Youbot {
   ]
 }
 KukaBox {
-  translation -0.0073709999999999965 0.007100679999999987 0.5124917228125002
-  rotation -8.842309600570207e-17 6.315935428978697e-16 -1 1.5707963267948966
+  translation 7.29263 -0.502899 0.0124917228125
+  rotation 6.315935434839578e-18 1.8947806289087015e-17 -1 1.5707963267948966
 }
 Youbot {
-  translation -7.699690040265291 0.00010762668324848722 0.10193771106250575
-  rotation -0.019087694338041174 0.9997303078170667 -0.013227681461636897 0.002110557206664199
+  translation -7.699690043340006 0.00010762624295917742 0.10193771736395624
+  rotation -0.01908746654381638 0.9997303098025938 -0.013227860104658304 0.002110530084020199
   controller "<none>"
   controllerArgs [
     "demo"
@@ -594,8 +604,8 @@ Pose {
   translation 3 4.5 0.014
   children [
     KukaBox {
-      translation -0.2599999999999998 -0.41000000000000014 -0.0015082771877389465
-      rotation 0.5702149732111267 -0.1315880707410188 -0.8108880711691908 1.4399334362326576e-16
+      translation -0.2599999999999998 -0.41000000000000014 -0.0015082771874999987
+      rotation -0.23432136510411672 0.702964095312345 -0.6715169235078441 1.3477079706693427e-16
       name "Kuka box(1)"
       color 1 1 0
     }

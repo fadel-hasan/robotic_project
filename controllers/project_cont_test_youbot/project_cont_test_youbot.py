@@ -18,10 +18,9 @@ LY = 0.158
 YOUBOT_RADIUS = LX + LY #math.sqrt((LX**2) + (LY**2))
 # YOUBOT_RADUIS = 0.277
 # PID Factors
-Kp = 0.02
+Kp = 0.01
 Kd = 0.01
-Ki = 0
-
+Ki = 0.00001
 # Last error to be used by the PID.
 last_error = 0
 
@@ -50,17 +49,17 @@ class RobotController(Supervisor):
         
         self.sensors = list(map(lambda v: self.getDevice(f"inf{v}"), range(1,9)))
         # self.weights = [-1000,1000,1000,-1000,1000,-1000,-1000,1000]
-        self.weights_speed = [-10,10,10,-10,10,-10,-10,10]
+        self.weights_speed = [-14,14,14,-14,14,-14,-14,14]
         
         self.positions = {
             "start": (0, 0),
-            "intersection_red_green": (0.9, 0),
-            "red_area": (0.9, 3.6),
-            "green_area": (0.9, -3.6),
-            "intersection_blue_yellow":(4,0),
-            "yellow_area":(4,3.6),
-            "blue_area":(4,-3.6),
-            "wall": (6.4, 0)
+            "intersection_red_green": (0.95, 0),
+            "red_area": (0.95, 3.6),
+            "green_area": (0.95, -3.6),
+            "intersection_blue_yellow":(3.95,0),
+            "yellow_area":(3.95,3.6),
+            "blue_area":(3.95,-3.6),
+            "wall": (6.52, 0)
         }
         
         
@@ -100,6 +99,44 @@ class RobotController(Supervisor):
         self.front_left_wheel.setVelocity(0)
         self.back_right_wheel.setVelocity(0)
         self.back_left_wheel.setVelocity(0)
+        
+        self.armMotors = []
+        self.armMotors.append(self.getDevice("arm1"))
+        self.armMotors.append(self.getDevice("arm2"))
+        self.armMotors.append(self.getDevice("arm3"))
+        self.armMotors.append(self.getDevice("arm4"))
+        self.armMotors.append(self.getDevice("arm5"))
+        # Set the maximum motor velocity.
+        self.armMotors[0].setVelocity(1.5) # maxVelocity = 1.5
+        self.armMotors[1].setVelocity(1.5)
+        self.armMotors[2].setVelocity(1.5)
+        self.armMotors[3].setVelocity(0.5)
+        self.armMotors[4].setVelocity(1.5)
+        
+        # self.armMotors[0].setPosition(0) # maxVelocity = 1.5
+        # self.armMotors[1].setPosition(0)
+        # self.armMotors[2].setPosition(0)
+        # self.armMotors[3].setPosition(0)
+        # self.armMotors[4].setPosition(0)
+        
+        self.armPositionSensors = []
+        self.armPositionSensors.append(self.getDevice("arm1sensor"))
+        self.armPositionSensors.append(self.getDevice("arm2sensor"))
+        self.armPositionSensors.append(self.getDevice("arm3sensor"))
+        self.armPositionSensors.append(self.getDevice("arm4sensor"))
+        self.armPositionSensors.append(self.getDevice("arm5sensor"))
+        for sensor in self.armPositionSensors:
+            sensor.enable(self.timestep)
+
+        self.finger1 = self.getDevice("finger::left")
+        self.finger2 = self.getDevice("finger::right")
+        self.finger1.setVelocity(1.5)
+        self.finger2.setVelocity(1.5) # 0.03
+        self.fingerMinPosition = self.finger1.getMinPosition()
+        self.fingerMaxPosition = self.finger1.getMaxPosition()
+        
+        self.dis_arm_sensor = self.getDevice('dis_arm')
+        self.dis_arm_sensor.enable(self.timestep)
         # plane_node = self.getFromDef("plane_1")
         # color_field = plane_node.getField("appearance").getSFNode().getField("material").getSFNode().getField("emissiveColor").getSFColor()
         # print(color_field)
@@ -153,6 +190,7 @@ class RobotController(Supervisor):
     def PID_step(self, velocity = YOUBOT_MAX_VELOCITY):
         global last_error, integral
         value = self.get_sensors_value()
+        print('value',value)
         error = 0 - value
         # print('error',error)
         # Get P term of the PID.
@@ -169,7 +207,7 @@ class RobotController(Supervisor):
         integral += error
 
         PID = P + D + I
-        # print('pid',PID)
+        print('pid',PID)
         # self.run_motors_stearing(steering,velocity)
         self.run_motors_speed(PID,velocity)
     
@@ -401,6 +439,55 @@ class RobotController(Supervisor):
                 self.go_to_yellow_area()
                 self.go_to_wall()
         
+    def fold_arms(self):
+        self.armMotors[0].setPosition(-2.9)
+        self.armMotors[1].setPosition(1.5)
+        self.armMotors[2].setPosition(-2.6)
+        self.armMotors[3].setPosition(1.7)
+        self.armMotors[4].setPosition(0)
+        
+    def stretch_arms(self):
+        self.armMotors[0].setPosition(2.9)
+        self.armMotors[1].setPosition(-1.0)
+        self.armMotors[2].setPosition(2.5)
+        self.armMotors[3].setPosition(-1.7)
+        self.armMotors[4].setPosition(0)
+        
+    def pick_up(self):
+        self.armMotors[1].setPosition(-1.13)
+        self.armMotors[2].setPosition(-0.9)
+        self.armMotors[3].setPosition(-0.6)
+        self.armMotors[4].setPosition(-1.3)
+        self.finger1.setPosition(self.fingerMaxPosition)
+        self.finger2.setPosition(self.fingerMaxPosition)
+
+        # Monitor the arm joint position to 
+        # detect when the motion is completed.
+        print(self.armPositionSensors[0].getValue())
+        print(self.armPositionSensors[1].getValue())
+        print(self.armPositionSensors[2].getValue())
+        print(self.armPositionSensors[3].getValue())
+        print(self.armPositionSensors[4].getValue())
+        
+        while self.step(self.timestep) != -1:
+            if abs(self.armPositionSensors[3].getValue() - (-1.2)) < 0.01:
+                
+            # Motion completed.
+                break
+        self.finger1.setPosition(0.013)     # Close gripper.
+        self.finger2.setPosition(0.013)
+        # self.step(50 * self.timestep)    # Wait until the gripper is closed.
+        self.armMotors[1].setPosition(0)    # Lift arm.
+        # Wait until the arm is lifted.
+        # robot.step(200 * timestep)
+    def hand_up(self):
+        self.armMotors[0].setPosition(0)
+        self.armMotors[1].setPosition(0)
+        self.armMotors[2].setPosition(0)
+        self.armMotors[3].setPosition(0)
+        self.armMotors[4].setPosition(0)
+        self.finger1.setPosition(self.fingerMaxPosition)
+        self.finger2.setPosition(self.fingerMaxPosition)
     def loop(self):
 
         while(self.step(self.timestep) != -1):
@@ -408,6 +495,12 @@ class RobotController(Supervisor):
                 self.read_array_color()            
             else:
                 self.process_colors()
+                # pass
+            # self.fold_arms()
+            # self.stretch_arms()
+            
+            # self.hand_up()
+            print(self.dis_arm_sensor.getValue())
 
 
 
