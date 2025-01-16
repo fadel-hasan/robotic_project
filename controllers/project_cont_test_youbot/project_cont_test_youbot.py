@@ -32,7 +32,8 @@ class RobotController(Supervisor):
     def __init__(self):
         Supervisor.__init__(self)
         self.timestep = int(self.getBasicTimeStep())
-        
+        self.robot_name = self.getName()
+        print(self.robot_name)
         self.color = list()
         self.color_queue = queue.Queue(4)
         self.rotate_err = 10
@@ -413,7 +414,7 @@ class RobotController(Supervisor):
         else:
             self.turn_angle(abs(angle), clockwise=False,velocity=4)
         self.current_position = target_position
-        self.move_distance_PID(distance,4)
+        self.move_distance_PID(distance,7)
         # return distance, angle
     
     def go_to_red_area(self):
@@ -487,27 +488,99 @@ class RobotController(Supervisor):
         # print('pick')
         self.armMotors[1].setPosition(0)    # Lift arm.
         self.armMotors[2].setPosition(-0.5)
+        self.armMotors[3].setPosition(-0.2)
+        
+        # print('after pick')
+        # Wait until the arm is lifted.
+        self.step(100 * self.timestep)
+        
+    def pick_up_r2(self,ang = 0):
+        self.armMotors[1].setPosition(-1.13)
+        self.armMotors[3].setPosition(-0.5)
+        self.armMotors[2].setPosition(-1.15)
+        self.armMotors[4].setPosition(ang)
+        self.finger1.setPosition(self.fingerMaxPosition)
+        self.finger2.setPosition(self.fingerMaxPosition)
+
+        while self.step(self.timestep) != -1:
+            if abs(self.armPositionSensors[3].getValue() - (-0.5)) < 0.01:
+                
+            # Motion completed.
+                break
+        self.finger1.setPosition(0.001)     # Close gripper.
+        self.finger2.setPosition(0.001)
+        self.step(50 * self.timestep)    # Wait until the gripper is closed.
+        # print('pick')
+        self.armMotors[1].setPosition(0)    # Lift arm.
+        self.armMotors[2].setPosition(-0.5)
+        self.armMotors[3].setPosition(-0.2)
+        
         # print('after pick')
         # Wait until the arm is lifted.
         self.step(100 * self.timestep)
         
         
     def hand_up(self):
-        self.finger1.setPosition(self.fingerMaxPosition)
-        self.finger2.setPosition(self.fingerMaxPosition)
         self.armMotors[0].setPosition(0)
         self.armMotors[1].setPosition(0)
         self.armMotors[2].setPosition(0)
         self.armMotors[3].setPosition(0)
         self.armMotors[4].setPosition(0)
+        self.finger1.setPosition(self.fingerMaxPosition)
+        self.finger2.setPosition(self.fingerMaxPosition)
+        self.step(50 * self.timestep)
     
+    def open_grippers(self):
+        self.finger1.setPosition(self.fingerMaxPosition)
+        self.finger2.setPosition(self.fingerMaxPosition)
+        self.step(100 * self.timestep)
+        
+    def close_grippers(self):
+        self.finger1.setPosition(0.001)
+        self.finger2.setPosition(0.001)
+        self.step(50 * self.timestep)
+    
+    def place_on_wall(self):
+        self.armMotors[2].setPosition(-0.2)
+        self.armMotors[3].setPosition(-1.6)
+        self.step(150 * self.timestep)
+        self.open_grippers()
+        
+    def place_on_area(self,ang = 0):
+        self.armMotors[1].setPosition(-1.13)
+        self.armMotors[3].setPosition(-0.5)
+        self.armMotors[2].setPosition(-1)
+        self.armMotors[4].setPosition(ang)
+        self.step(200 * self.timestep)
+        self.finger1.setPosition(self.fingerMaxPosition)
+        self.finger2.setPosition(self.fingerMaxPosition)
+        self.hand_up()
+        
+    def wait(self,time = 2500):
+        self.step(time * self.timestep)
+        
+    def pick_From_wall(self):
+        self.finger1.setPosition(self.fingerMaxPosition)
+        self.finger2.setPosition(self.fingerMaxPosition)
+        # self.armMotors[1].setPosition(-0.1)
+        self.armMotors[2].setPosition(-0.1)
+        self.armMotors[3].setPosition(-1.5)
+        self.step(300 * self.timestep)
+        self.close_grippers()
+        
     def halt(self):
         self.front_right_wheel.setVelocity(0)
         self.front_left_wheel.setVelocity(0)
         self.back_right_wheel.setVelocity(0)
         self.back_left_wheel.setVelocity(0)
         
-        
+    def drop(self):
+        self.armMotors[0].setPosition(-2.9)
+        self.armMotors[1].setPosition(0)
+        self.armMotors[2].setPosition(-1)
+        self.armMotors[3].setPosition(-1)
+        self.armMotors[2].setPosition(-1.7)
+        self.armMotors[4].setPosition(2.9)
         
     def pick_up_cubes(self):
         while True:
@@ -564,30 +637,60 @@ class RobotController(Supervisor):
         return max(move_distance, 0)
     
     
-    def process_colors(self):
+    def process_colors_r1(self):
         while not self.color_queue.empty():  
             color = self.color_queue.get()  
             if color == 'red':
                 self.go_to_red_area()
                 self.pick_up_cubes()
                 self.go_to_wall()
+                self.place_on_wall()
                 self.hand_up()
             elif color == 'green':
                 self.go_to_green_area()
                 self.pick_up_cubes()
                 self.go_to_wall()
+                self.place_on_wall()
                 self.hand_up()
             elif color == 'blue':
                 self.go_to_blue_area()
                 self.pick_up_cubes()
                 self.go_to_wall()
+                self.place_on_wall()
                 self.hand_up()
             elif color == 'yellow':
                 self.go_to_yellow_area()
                 self.pick_up_cubes()
                 self.go_to_wall()
+                self.place_on_wall()
                 self.hand_up()
     
+    def process_colors_r2(self):
+        while not self.color_queue.empty():  
+            color = self.color_queue.get()  
+            if color == 'red':
+                self.go_to_wall()
+                self.wait()
+                self.pick_From_wall()
+                self.go_to_red_area()
+                self.place_on_area()
+            elif color == 'green':
+                self.go_to_wall()
+                self.wait(1000)
+                self.pick_From_wall()
+                self.go_to_green_area()
+                self.place_on_area()
+            elif color == 'blue':
+                self.go_to_wall()
+                self.pick_From_wall()
+                self.go_to_blue_area()
+                self.place_on_area()
+            elif color == 'yellow':
+                self.go_to_wall()
+                self.pick_From_wall()
+                self.go_to_yellow_area()
+                self.place_on_area()
+                
     def loop(self):
 
         # self.pick_up_cubes()
@@ -596,14 +699,11 @@ class RobotController(Supervisor):
             if not self.read_array:
                 self.read_array_color()            
             else:
-                self.go_to_red_area()
-                self.pick_up_cubes()
-                self.go_to_wall()
-                self.hand_up()
-                self.go_to_red_area()
-                self.pick_up_cubes()
-                self.go_to_wall()
-                self.hand_up()
+                if self.robot_name == 'youBot(2)':
+                    self.process_colors_r2()
+                else:    
+                    self.process_colors_r1()
+                break                
                 # self.process_colors()
             #     self.go_to_red_area()
             #     self.halt()

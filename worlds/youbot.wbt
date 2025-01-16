@@ -44,9 +44,8 @@ WorldInfo {
 }
 Viewpoint {
   fieldOfView 0.785399
-  orientation 0.33312178463289266 0.39132475697772523 -0.8578431157148262 1.5630923064334015
-  position 4.431807209355087 5.731150345969723 4.0574861189221245
-  follow "youBot"
+  orientation 0.5549305769979149 0.5551205756283187 -0.6195911565111669 2.0318803038323914
+  position 0.11512627231834281 2.139493064613403 18.507541639100168
 }
 TexturedBackground {
 }
@@ -789,18 +788,75 @@ Youbot {
   ]
 }
 Youbot {
-  translation -7.699690043343289 0.00010762618457157439 0.10193771736395624
-  rotation -0.019087466539686095 0.9997303097671586 -0.013227862788727902 0.002110530084094634
-  controller "<none>"
-  controllerArgs [
-    "demo"
-  ]
+  translation -7.70018 0.00414582 0.102578
+  rotation -2.0321509008559823e-05 0.0010549804676746521 0.9999994433014696 0
+  name "youBot(2)"
+  controller "project_cont_test_youbot"
+  supervisor TRUE
   bodySlot [
+    DistanceSensor {
+      translation 0.27 0 -0.08
+      rotation 0 1 0 0
+      name "dis_arm"
+      translationStep 0.3
+      lookupTable [
+        0 0 0
+        0.5 1000 0
+      ]
+    }
+    DistanceSensor {
+      translation 0.23 0.06 -0.094
+      rotation 0 1 0 1.5707996938995747
+      name "inf1"
+      type "infra-red"
+    }
+    DistanceSensor {
+      translation 0.23 -0.06 -0.094
+      rotation 0 1 0 1.5707996938995747
+      name "inf2"
+      type "infra-red"
+    }
+    DistanceSensor {
+      translation 0.23 -0.08 -0.094
+      rotation 0 1 0 1.5707996938995747
+      name "inf3"
+      type "infra-red"
+    }
+    DistanceSensor {
+      translation 0.23 0.08 -0.094
+      rotation 0 1 0 1.5707996938995747
+      name "inf4"
+      type "infra-red"
+    }
+    DistanceSensor {
+      translation 0.23 -0.1 -0.094
+      rotation 0 1 0 1.5707996938995747
+      name "inf5"
+      type "infra-red"
+    }
+    DistanceSensor {
+      translation 0.23 0.1 -0.094
+      rotation 0 1 0 1.5707996938995747
+      name "inf6"
+      type "infra-red"
+    }
+    DistanceSensor {
+      translation 0.23 0.11 -0.094
+      rotation 0 1 0 1.5707996938995747
+      name "inf7"
+      type "infra-red"
+    }
+    DistanceSensor {
+      translation 0.23 -0.11 -0.094
+      rotation 0 1 0 1.5707996938995747
+      name "inf8"
+      type "infra-red"
+    }
     Camera {
-      translation 0.231096 0 -0.04975
-      rotation 0 1 0 1.57
+      translation 0.23 0 -0.0800001
+      rotation 0 1 0 1.5708003061004252
       name "cam"
-      fieldOfView 1e-05
+      fieldOfView 0.0001
       width 1
       height 1
     }
