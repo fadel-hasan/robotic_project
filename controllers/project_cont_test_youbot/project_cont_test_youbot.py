@@ -39,11 +39,15 @@ class RobotController(Supervisor):
         self.rotate_err = 10
         self.camera = self.getDevice("cam")
         self.camera.enable(self.timestep)
-        
+        if self.robot_name == 'youBot(2)':
+            self.arm_camera = self.getDevice('arm_camera')
+            self.arm_camera.enable(self.timestep)
+            self.arm_distance_sensor = self.getDevice('arm_dis_sens')
+            self.arm_distance_sensor.enable(self.timestep)
         self.read_array = False
         
         self.plane_colors_1 = ['r','g','b','y']
-        self.plane_colors_2 = ['r','g','b','y']
+        self.plane_colors_2 = ['g','y','r','b']
         # توابع لتغير مصفوات الالوان حسب الملف النصي color.txt
         # self.read_colors_from_file()
         self.change_plane_color()
@@ -66,7 +70,9 @@ class RobotController(Supervisor):
         
         self.current_position = "start"
         self.current_direction = 0
-        
+        self.pick_count = 0
+        self.box_pick_step = 0
+        self.fix_left_right_err = 0
         for sensor in self.sensors:
             # print("enabled: ", sensor)
             sensor.enable(self.timestep)
@@ -228,10 +234,19 @@ class RobotController(Supervisor):
     def move_backward(self, velocity):
         self.set_motors_velocity(-velocity, -velocity, -velocity, -velocity)
 
+    def move_right(self,velocity):
+        self.back_left_wheel.setVelocity(-velocity)
+        self.front_left_wheel.setVelocity(velocity)
+        self.back_right_wheel.setVelocity(velocity)
+        self.front_right_wheel.setVelocity(-velocity)
+        
+        
+        
+   
     def move_left(self, velocity):
         self.front_right_wheel.setVelocity(velocity)
-        self.front_left_wheel.setVelocity(-velocity)
         self.back_left_wheel.setVelocity(velocity)
+        self.front_left_wheel.setVelocity(-velocity)
         self.back_right_wheel.setVelocity(-velocity)
         
     def turn_cw(self, velocity):
@@ -312,6 +327,63 @@ class RobotController(Supervisor):
             velocity
         )
     
+    def move_distance_left_right(
+        self,
+        distance,
+        velocity = YOUBOT_MAX_VELOCITY
+    ):
+
+        rotations = abs(distance) / (2 * math.pi * YOUBOT_WHEEL_RADIUS)
+        self.run_motors_for_left_right(
+            rotations,
+            velocity,
+            'left' if distance < 0 else 'right'
+        )
+        
+    
+    def run_motors_for_left_right(
+        self,
+        rotations,
+        velocity,
+        direction
+    ):
+
+        # calculate angle = number_of_rotations / 2 * PI
+        angle = rotations * 2 * math.pi
+        # print('angle: ',angle)
+        print('angle: ', angle)
+        curr_front_left = self.f_left_w_sensor.getValue()
+        curr_back_left = self.b_right_w_sensor.getValue()
+
+        # print('curr_front_left: ',curr_front_left)
+        # print('curr_back_left: ',curr_back_left)
+        
+        if direction == 'left':
+            self.move_left(velocity)
+        else:
+            self.move_right(velocity)
+
+        while True:
+            current_front_left = self.f_left_w_sensor.getValue()
+            current_back_left = self.b_right_w_sensor.getValue()
+            
+            # print('current_front_left: ',current_front_left)
+            # print('current_back_left: ',current_back_left)
+            
+            diff_front_left = current_front_left - curr_front_left
+            diff_back_left = current_back_left - curr_back_left
+
+            # print('diff_front_left: ',diff_front_left)
+            # print('diff_back_left: ',diff_back_left)
+            avg_angle = (diff_front_left + diff_back_left) /2
+            # print('angle avg: ',avg_angle )
+            if abs(avg_angle) >= angle:
+                self.set_motors_velocity(0,0,0,0)
+                break
+            # print('move')
+            # print('sesor live move: ',avg_angle)
+            self.step(self.timestep)
+    
     def turn_angle(self, angle,clockwise=True,direc = True,velocity = YOUBOT_MAX_VELOCITY):
         """
             A funtion that will turn the robot by specafic angle (in degrees) counterclockwise
@@ -334,8 +406,8 @@ class RobotController(Supervisor):
             elif not clockwise:
                 self.current_direction -= angle
                 velocity = -velocity
-        print('eerrr rot',self.rotate_err)
-        print('angle for rotation now from turn angle function',angle)
+        # print('eerrr rot',self.rotate_err)
+        print('angle for rotation now from turn angle function from {}'.format(self.robot_name),angle)
         distance = (2 * math.pi * YOUBOT_RADIUS) / (360 / (abs(angle) + self.rotate_err))
         
         
@@ -392,13 +464,13 @@ class RobotController(Supervisor):
         dx = pos2[0] - pos1[0]
         dy = pos2[1] - pos1[1]
         target_angle = math.degrees(math.atan2(dy, dx))
-        print('target:', target_angle)
-        print('current direc',self.current_direction)
+        # print('target:', target_angle)
+        # print('current direc',self.current_direction)
         angle_diff = target_angle - self.current_direction
-        print('angle_diff befor norm',angle_diff)
+        # print('angle_diff befor norm',angle_diff)
         # تطبيع الفرق بين -180 و 180 درجة
         angle_diff = (angle_diff + 180) % 360 - 180
-        print('angle_diff after norm',angle_diff)
+        # print('angle_diff after norm',angle_diff)
         # angle_diff = angle_diff - 15 if abs(angle_diff) > 90 else angle_diff - 10 if abs(angle_diff) == 90 else angle_diff
         return angle_diff#+ (self.rotate_err * angle_diff)
     
@@ -463,7 +535,6 @@ class RobotController(Supervisor):
         self.armMotors[4].setPosition(ang)
         self.finger1.setPosition(self.fingerMaxPosition)
         self.finger2.setPosition(self.fingerMaxPosition)
-
         # Monitor the arm joint position to 
         # detect when the motion is completed.
         # print(self.armPositionSensors[0].getValue())
@@ -489,10 +560,10 @@ class RobotController(Supervisor):
         self.armMotors[1].setPosition(0)    # Lift arm.
         self.armMotors[2].setPosition(-0.5)
         self.armMotors[3].setPosition(-0.2)
-        
+        self.armMotors[4].setPosition(-ang)
         # print('after pick')
         # Wait until the arm is lifted.
-        self.step(100 * self.timestep)
+        self.step(50 * self.timestep)
         
     def pick_up_r2(self,ang = 0):
         self.armMotors[1].setPosition(-1.13)
@@ -528,32 +599,32 @@ class RobotController(Supervisor):
         self.armMotors[4].setPosition(0)
         self.finger1.setPosition(self.fingerMaxPosition)
         self.finger2.setPosition(self.fingerMaxPosition)
-        self.step(50 * self.timestep)
+        self.step(100 * self.timestep)
     
     def open_grippers(self):
         self.finger1.setPosition(self.fingerMaxPosition)
         self.finger2.setPosition(self.fingerMaxPosition)
-        self.step(100 * self.timestep)
+        self.step(200 * self.timestep)
         
     def close_grippers(self):
-        self.finger1.setPosition(0.001)
-        self.finger2.setPosition(0.001)
-        self.step(50 * self.timestep)
+        self.finger1.setPosition(0.015/2)
+        self.finger2.setPosition(0.015/2)
+        self.step(100 * self.timestep)
     
     def place_on_wall(self):
         self.armMotors[2].setPosition(-0.2)
-        self.armMotors[3].setPosition(-1.6)
-        self.step(150 * self.timestep)
+        self.armMotors[3].setPosition(-1.5)
+        self.armMotors[4].setPosition(0)
+        self.step(300 * self.timestep)
         self.open_grippers()
         
     def place_on_area(self,ang = 0):
         self.armMotors[1].setPosition(-1.13)
         self.armMotors[3].setPosition(-0.5)
-        self.armMotors[2].setPosition(-1)
+        self.armMotors[2].setPosition(-1.15)
         self.armMotors[4].setPosition(ang)
         self.step(200 * self.timestep)
-        self.finger1.setPosition(self.fingerMaxPosition)
-        self.finger2.setPosition(self.fingerMaxPosition)
+        self.open_grippers()
         self.hand_up()
         
     def wait(self,time = 2500):
@@ -563,10 +634,13 @@ class RobotController(Supervisor):
         self.finger1.setPosition(self.fingerMaxPosition)
         self.finger2.setPosition(self.fingerMaxPosition)
         # self.armMotors[1].setPosition(-0.1)
-        self.armMotors[2].setPosition(-0.1)
+        self.armMotors[2].setPosition(-0.15)
         self.armMotors[3].setPosition(-1.5)
         self.step(300 * self.timestep)
+        color_arr = self.arm_camera.getImageArray()
+        print(color_arr)
         self.close_grippers()
+        self.pick_count+=1
         
     def halt(self):
         self.front_right_wheel.setVelocity(0)
@@ -585,10 +659,10 @@ class RobotController(Supervisor):
     def pick_up_cubes(self):
         while True:
             distance = self.dis_arm_sensor.getValue()
-            print(distance)
+            # print(distance)
             if distance < 450:  
                 self.pick_up()  
-
+                self.pick_count+=1
             else:
                 # self.rotate_err = 0
                 for angle in range(0, 40, 1):  
@@ -597,100 +671,330 @@ class RobotController(Supervisor):
                     if distance < 900:
                         dis = self.calculate_move_distance(distance)
                         self.move_distance_PID(distance= dis)
-                        print('dis',distance)
-                        print('norm:',dis)
-                        print('factor',angle/100)
+                        # print('dis',distance)
+                        # print('norm:',dis)
+                        # print('factor',angle/100)
                         self.turn_angle(3, True,False ,velocity=2)
                         factor = angle/70
                         self.pick_up(ang= -factor)
+                        self.pick_count+=1
                         self.move_distance_PID(distance= -dis)
                         self.turn_angle(angle + 5,False,False,velocity=2)
-                        print(f"Current Angle: {angle}, Distance: {distance}")
+                        # print(f"Current Angle: {angle}, Distance: {distance}")
                         return
                 else:
                     self.turn_angle(angle + 2,False,False,velocity=2)
-                print('round2')
+                # print('round2')
                 for angle in range(0, -40, -1):  
                     self.turn_angle(-1, False,False,velocity=2)  
                     distance = self.dis_arm_sensor.getValue()
                     if distance < 900:
                         dis = self.calculate_move_distance(distance)
                         self.move_distance_PID(distance= dis)
-                        print('dis',distance)
-                        print('norm:',dis)
-                        print('factor',angle/100)
+                        # print('dis',distance)
+                        # print('norm:',dis)
+                        # print('factor',angle/100)
                         self.turn_angle(-3, False, False,velocity=2)
                         factor = angle/70
                         self.pick_up(ang= -factor)
+                        self.pick_count+=1
                         self.move_distance_PID(distance= -dis)
+                        self.turn_angle(angle - 5,True,False,velocity=2)
+                        # print(f"Current Angle: {angle}, Distance: {distance}")
+                        return
+                else:
+                    self.turn_angle(angle - 2,True,False,velocity=2)
+            return
+    
+    def place_up_cubes(self):
+        print('box step: ',self.box_pick_step)
+        step = self.box_pick_step
+        while True:
+            distance = self.dis_arm_sensor.getValue()
+            # print(distance)
+            if distance > 900:  
+                self.place_on_area()  
+
+            else:
+                # self.rotate_err = 0
+                for angle in range(0, 40, 5):  
+                    self.turn_angle(5, True, False,velocity=2)  
+                    distance = self.dis_arm_sensor.getValue()  
+                    if distance > 900:
+                        dis = self.calculate_place_distance()
+                        self.turn_angle(5, True,False ,velocity=2)
+                        angle_fix = step
+                        print('step: ',step)
+                        while step > 1:
+                            self.turn_angle(5 + (angle_fix -1)*5 , True,False ,velocity=2)
+                            step-=1
+                        # self.step(50 * self.timestep)
+                        self.move_distance_PID(distance= dis)
+                        # print('dis',distance)
+                        # print('norm:',dis)
+                        # print('factor',angle/100)
+                        factor = angle/70
+                        # self.pick_up(ang= -factor)
+                        self.place_on_area(ang = -factor)
+                        self.move_distance_PID(distance= -dis)
+                        self.turn_angle(angle + (angle_fix * 5) + ((angle_fix -1)*5),False,False,velocity=2)
+                        print(f"Current Angle: {angle}, Distance: {distance}")
+                        return
+                else:
+                    self.turn_angle(angle + 2,False,False,velocity=2)
+                print('round2')
+                for angle in range(0, -40, -5):  
+                    self.turn_angle(-5, False,False,velocity=2)  
+                    distance = self.dis_arm_sensor.getValue()
+                    if distance > 900:
+                        dis = self.calculate_place_distance()
+                        self.turn_angle(-5, False, False,velocity=2)
+                        # self.move_distance_PID(distance= dis)
+                        self.step(50 * self.timestep)
+                        # print('dis',distance)
+                        # print('norm:',dis)
+                        # print('factor',angle/100)
+                        factor = angle/70
+                        self.place_on_area(ang = -factor)
+                        # self.move_distance_PID(distance= -dis)
                         self.turn_angle(angle - 5,True,False,velocity=2)
                         print(f"Current Angle: {angle}, Distance: {distance}")
                         return
                 else:
                     self.turn_angle(angle - 2,True,False,velocity=2)
             return
-    
+
     def calculate_move_distance(self, distance):
         a = 0.000352  
         b = -0.1525   
         move_distance = a * distance + b
         return max(move_distance, 0)
     
+    def calculate_place_distance(self):
+
+        move_distances = [0.00272063, 0.0187, 0.0712]
     
+        if self.box_pick_step == 1 or self.box_pick_step == 4:
+            index = 0
+        elif self.box_pick_step == 2 or self.box_pick_step == 5:
+            index = 1
+        else:
+            index = 2
+        return move_distances[index]
+    
+    def move_place_wall(self):
+        position_in_set = (self.pick_count - 1) % 4 + 1
+
+        if position_in_set == 1:
+            # Cube 1: Do not move
+            self.place_on_wall()
+            self.hand_up()
+        elif position_in_set == 2:
+            # Cube 2 or 4: Move left by 0.1 and then back
+            self.move_distance_left_right(0.1)
+            self.wait(20)
+            self.place_on_wall()
+            self.hand_up()
+            self.move_distance_left_right(-0.1)
+            self.wait(20)
+        elif position_in_set == 3:
+            # Cube 3: Move right by 0.1 and then back
+            self.move_distance_left_right(0.2)
+            self.wait(20)
+            self.place_on_wall()
+            self.hand_up()
+            self.move_distance_left_right(-0.2)
+            self.wait(20)
+        elif position_in_set == 4:
+            # Cube 4: Move left by 0.1 and then back
+            self.move_distance_left_right(-0.1)
+            self.wait(20)
+            self.place_on_wall()
+            self.hand_up()
+            self.move_distance_left_right(0.1)
+            self.wait(20)
+        
     def process_colors_r1(self):
-        while not self.color_queue.empty():  
-            color = self.color_queue.get()  
+        for color in list(self.color_queue.queue):
+            print('color:',color)  
+            # color = self.color_queue.get()  
             if color == 'red':
                 self.go_to_red_area()
                 self.pick_up_cubes()
                 self.go_to_wall()
-                self.place_on_wall()
-                self.hand_up()
+                # self.place_on_wall()
+                # self.hand_up()
+                self.move_place_wall()
             elif color == 'green':
                 self.go_to_green_area()
                 self.pick_up_cubes()
                 self.go_to_wall()
-                self.place_on_wall()
-                self.hand_up()
+                # self.place_on_wall()
+                # self.hand_up()
+                self.move_place_wall()
+                
             elif color == 'blue':
                 self.go_to_blue_area()
                 self.pick_up_cubes()
                 self.go_to_wall()
-                self.place_on_wall()
-                self.hand_up()
+                # self.place_on_wall()
+                # self.hand_up()
+                self.move_place_wall()
+                
             elif color == 'yellow':
                 self.go_to_yellow_area()
                 self.pick_up_cubes()
                 self.go_to_wall()
-                self.place_on_wall()
-                self.hand_up()
+                # self.place_on_wall()
+                # self.hand_up()
+                self.move_place_wall()
+                
     
     def process_colors_r2(self):
-        while not self.color_queue.empty():  
-            color = self.color_queue.get()  
+        for color in list(self.color_queue.queue):  
             if color == 'red':
                 self.go_to_wall()
-                self.wait()
-                self.pick_From_wall()
+                # self.pick_From_wall()
+                while True:
+                    done = self.search_for_color(color)
+                    if done:
+                        break
                 self.go_to_red_area()
-                self.place_on_area()
+                # self.place_on_area()
+                self.place_up_cubes()
             elif color == 'green':
                 self.go_to_wall()
-                self.wait(1000)
-                self.pick_From_wall()
+                while True:
+                    done = self.search_for_color(color)
+                    if done:
+                        break
+                
+                # self.pick_From_wall()
                 self.go_to_green_area()
-                self.place_on_area()
+                # self.place_on_area()
+                self.place_up_cubes()
             elif color == 'blue':
                 self.go_to_wall()
-                self.pick_From_wall()
+                # self.pick_From_wall()
+                while True:
+                    done = self.search_for_color(color)
+                    if done:
+                        break
+                
                 self.go_to_blue_area()
-                self.place_on_area()
+                # self.place_on_area()
+                self.place_up_cubes()
             elif color == 'yellow':
                 self.go_to_wall()
-                self.pick_From_wall()
+                # self.pick_From_wall()
+                while True:
+                    done = self.search_for_color(color)
+                    if done:
+                        break
                 self.go_to_yellow_area()
-                self.place_on_area()
+                # self.place_on_area()
+                self.place_up_cubes()
                 
+    def detect_color(self, camera_data):
+
+        red = camera_data[0][0][0]
+        green = camera_data[0][0][1]
+        blue = camera_data[0][0][2]
+
+        if red > 200 and green < 100 and blue < 100:
+            return "red"
+        elif green > 200 and red < 100 and blue < 100:
+            return "green"
+        elif blue > 200 and red < 100 and green < 100:
+            return "blue"
+        elif red > 200 and green > 200 and blue < 100:
+            return "yellow"
+        else:
+            return "unknown"
+    
+    def dynamic_pick_from_wall(self):
+        data = self.arm_distance_sensor.getValue()
+        self.armMotors[2].setPosition(self.armMotors[2].getTargetPosition() - data/10000)
+        self.armMotors[3].setPosition(self.armMotors[3].getTargetPosition() + data/12000)
+        self.step(self.timestep * 10)
+        if data <= 103:
+            self.close_grippers()
+            return True
+        
+    def search_for_color(self, target_color):
+
+        check = 0
+        self.armMotors[2].setPosition(0.2)
+        self.armMotors[3].setPosition(-1.75)
+        self.step(100 * self.timestep)
+        self.open_grippers()
+        print('fix err',self.fix_left_right_err)
+        # تحريك الذراع للبحث عن اللون
+        camera_data = self.arm_camera.getImageArray()
+        detected_color = self.detect_color(camera_data)
+        if detected_color == target_color:
+            while self.step(self.timestep) != -1:
+                done=self.dynamic_pick_from_wall()    
+                if done:
+                    self.pick_count+=1
+                    self.armMotors[2].setPosition(0)
+                    self.armMotors[3].setPosition(-0.5)
+                    self.step(100 * self.timestep)
+                    return done
+        
+        while check <= 0.3:
+            check+=0.1
+            self.move_distance_left_right(0.1,7)
+            self.step(self.timestep * 20)
+            self.fix_left_right_err+=0.1
+            camera_data = self.arm_camera.getImageArray()
+            if camera_data:
+                detected_color = self.detect_color(camera_data)
+                if detected_color == target_color:
+                    while self.step(self.timestep) != -1:
+                            done=self.dynamic_pick_from_wall()
+                            if done:
+                                self.pick_count+=1
+                                self.armMotors[2].setPosition(0)
+                                self.armMotors[3].setPosition(-0.5)
+                                self.step(100 * self.timestep)
+                                self.move_distance_left_right(-check,7)
+                                self.step(self.timestep * 50)
+                                return done
+        else:
+            self.move_distance_left_right(-check,7)
+            self.fix_left_right_err-=check
+            self.step(self.timestep * 50)
+            check = 0
+        print('check',check)
+        while check >= -0.3:
+            check-=0.1
+            self.move_distance_left_right(-0.1,7)
+            self.step(self.timestep * 20)
+            self.fix_left_right_err-=0.1
+            camera_data = self.arm_camera.getImageArray()
+            if camera_data:
+                detected_color = self.detect_color(camera_data)
+                if detected_color == target_color:
+                    while self.step(self.timestep) != -1:
+                            done=self.dynamic_pick_from_wall()
+                            if done:
+                                self.pick_count+=1
+                                self.armMotors[2].setPosition(0)
+                                self.armMotors[3].setPosition(-0.5)
+                                self.step(100 * self.timestep)
+                                self.move_distance_left_right(-check,7)
+                                self.step(self.timestep * 50)
+                                return done
+        else:
+            print('cheak in -',check)
+            self.move_distance_left_right(-check,7)
+            self.fix_left_right_err+=check
+            self.step(self.timestep * 50)
+            check = 0
+                   
+        print(f"لم يتم العثور على اللون {target_color}.")
+        return False
     def loop(self):
 
         # self.pick_up_cubes()
@@ -701,9 +1005,21 @@ class RobotController(Supervisor):
             else:
                 if self.robot_name == 'youBot(2)':
                     self.process_colors_r2()
+                    # self.go_to_wall()
+                    # self.search_for_color('red')
+                    # self.box_pick_step+=1
+                    break
                 else:    
                     self.process_colors_r1()
-                break                
+                    
+                    break
+            # if self.robot_name == 'youBot(2)':
+                
+            #     self.search_for_color('red')
+                
+            #     break
+            # else:
+            #     exit(0)
                 # self.process_colors()
             #     self.go_to_red_area()
             #     self.halt()
