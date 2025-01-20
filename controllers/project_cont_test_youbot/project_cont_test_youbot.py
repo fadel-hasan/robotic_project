@@ -46,7 +46,7 @@ class RobotController(Supervisor):
             self.arm_distance_sensor.enable(self.timestep)
         self.read_array = False
         
-        self.plane_colors_1 = ['r','g','b','y']
+        self.plane_colors_1 = ['g','r','b','y']
         self.plane_colors_2 = ['g','y','r','b']
         # توابع لتغير مصفوات الالوان حسب الملف النصي color.txt
         # self.read_colors_from_file()
@@ -73,11 +73,14 @@ class RobotController(Supervisor):
         self.pick_count = 0
         self.box_pick_step = 0
         self.fix_left_right_err = 0
+        self.distance = 0.12
         for sensor in self.sensors:
             # print("enabled: ", sensor)
             sensor.enable(self.timestep)
             
-            
+        self.N_char = [[1,0,1],
+                       [1,1,1],
+                       [1,0,1]]   
         self.f_right_w_sensor = self.getDevice("wheel1sensor")
         self.f_left_w_sensor = self.getDevice("wheel2sensor")
         self.b_right_w_sensor = self.getDevice("wheel3sensor")
@@ -451,7 +454,14 @@ class RobotController(Supervisor):
             avg_diff = (right_diff + left_diff) / 2
 
             if avg_diff >= angle:
-                break
+                # if self.current_position == 'wall':
+                #     print('distance value',self.dis_arm_sensor.getValue())
+                #     if self.dis_arm_sensor.getValue() > 107:
+                #         continue
+                #     else:
+                #         break
+                # else:
+                    break
 
             self.step(self.timestep)
 
@@ -505,11 +515,14 @@ class RobotController(Supervisor):
         self.move_to_position("intersection_blue_yellow")
         self.move_to_position("blue_area")
         
-    def go_to_wall(self):
+    def go_to_intersection(self):
         if self.current_position == 'red_area' or self.current_position == 'green_area':
             self.move_to_position("intersection_red_green")
         if self.current_position == 'yellow_area' or self.current_position == 'blue_area':
             self.move_to_position("intersection_blue_yellow")
+    
+    def go_to_wall(self):
+        self.go_to_intersection()
         self.move_to_position("wall")
         
     
@@ -553,9 +566,8 @@ class RobotController(Supervisor):
                 
             # Motion completed.
                 break
-        self.finger1.setPosition(0.001)     # Close gripper.
-        self.finger2.setPosition(0.001)
-        self.step(50 * self.timestep)    # Wait until the gripper is closed.
+        self.close_grippers()
+        # self.step(50 * self.timestep)    # Wait until the gripper is closed.
         # print('pick')
         self.armMotors[1].setPosition(0)    # Lift arm.
         self.armMotors[2].setPosition(-0.5)
@@ -612,7 +624,7 @@ class RobotController(Supervisor):
         self.step(100 * self.timestep)
     
     def place_on_wall(self):
-        self.armMotors[2].setPosition(-0.2)
+        self.armMotors[2].setPosition(-0.15)
         self.armMotors[3].setPosition(-1.5)
         self.armMotors[4].setPosition(0)
         self.step(300 * self.timestep)
@@ -650,11 +662,45 @@ class RobotController(Supervisor):
         
     def drop(self):
         self.armMotors[0].setPosition(-2.9)
-        self.armMotors[1].setPosition(0)
+        self.wait(50)
+        self.armMotors[1].setPosition(-0.13)
+        self.wait(50)
         self.armMotors[2].setPosition(-1)
+        self.wait(100)
         self.armMotors[3].setPosition(-1)
-        self.armMotors[2].setPosition(-1.7)
-        self.armMotors[4].setPosition(2.9)
+        self.wait(100)
+        self.armMotors[2].setPosition(-1.6)
+        self.wait(100)
+        # self.armMotors[4].setPosition(1.2)
+        # self.wait(100)
+        self.open_grippers()
+        
+    def pick_from_drop(self):
+        self.armMotors[0].setPosition(-2.9)
+        self.wait(50)
+        self.armMotors[1].setPosition(-0.17)
+        self.wait(100)
+        self.armMotors[2].setPosition(-1)
+        self.wait(100)
+        self.armMotors[3].setPosition(-0.9)
+        self.wait(100)
+        # self.armMotors[4].setPosition(1.2)
+        # self.wait(100)
+        self.armMotors[2].setPosition(-1.63)
+        self.wait(100)
+        # self.armMotors[3].setPosition(-1)
+        # self.wait(150)
+        # self.armMotors[2].setPosition(-1.63)
+        # self.wait(100)
+        self.close_grippers()
+        
+    def from_drop_to_wall(self):
+        self.armMotors[0].setPosition(0)
+        self.armMotors[1].setPosition(0)
+        self.armMotors[2].setPosition(0)
+        self.armMotors[3].setPosition(0)
+        self.armMotors[4].setPosition(0)
+        self.wait(300)
         
     def pick_up_cubes(self):
         while True:
@@ -709,59 +755,68 @@ class RobotController(Supervisor):
     def place_up_cubes(self):
         print('box step: ',self.box_pick_step)
         step = self.box_pick_step
+        dis = 0.1
         while True:
             distance = self.dis_arm_sensor.getValue()
             # print(distance)
             if distance > 900:  
+                self.move_distance_PID(distance= dis)
                 self.place_on_area()  
-
+                self.move_distance_PID(distance= -dis)
             else:
                 # self.rotate_err = 0
-                for angle in range(0, 40, 5):  
-                    self.turn_angle(5, True, False,velocity=2)  
-                    distance = self.dis_arm_sensor.getValue()  
-                    if distance > 900:
-                        dis = self.calculate_place_distance()
-                        self.turn_angle(5, True,False ,velocity=2)
-                        angle_fix = step
-                        print('step: ',step)
-                        while step > 1:
-                            self.turn_angle(5 + (angle_fix -1)*5 , True,False ,velocity=2)
-                            step-=1
-                        # self.step(50 * self.timestep)
-                        self.move_distance_PID(distance= dis)
-                        # print('dis',distance)
-                        # print('norm:',dis)
-                        # print('factor',angle/100)
-                        factor = angle/70
-                        # self.pick_up(ang= -factor)
-                        self.place_on_area(ang = -factor)
-                        self.move_distance_PID(distance= -dis)
-                        self.turn_angle(angle + (angle_fix * 5) + ((angle_fix -1)*5),False,False,velocity=2)
-                        print(f"Current Angle: {angle}, Distance: {distance}")
-                        return
+                if self.box_pick_step <4:
+                    for angle in range(0, 40, 5):  
+                        self.turn_angle(5, True, False,velocity=2)  
+                        distance = self.dis_arm_sensor.getValue()  
+                        if distance > 900:
+                            # dis = self.calculate_place_distance()
+                            self.turn_angle(5, True,False ,velocity=2)
+                            angle_fix = step
+                            print('step: ',step)
+                            while step > 1:
+                                self.turn_angle(5 + (angle_fix -1)*5 , True,False ,velocity=2)
+                                step-=1
+                            self.move_distance_PID(distance= dis)
+                            # print('dis',distance)
+                            # print('norm:',dis)
+                            # print('factor',angle/100)
+                            factor = angle/70
+                            # self.pick_up(ang= -factor)
+                            self.place_on_area(ang = -factor)
+                            self.move_distance_PID(distance= -dis)
+                            self.step(50 * self.timestep)
+                            self.turn_angle(angle + (angle_fix * 5) + ((angle_fix -1)*5),False,False,velocity=2)
+                            print(f"Current Angle: {angle}, Distance: {distance}")
+                            return
+                    else:
+                        self.turn_angle(angle + 2,False,False,velocity=2)
                 else:
-                    self.turn_angle(angle + 2,False,False,velocity=2)
-                print('round2')
-                for angle in range(0, -40, -5):  
-                    self.turn_angle(-5, False,False,velocity=2)  
-                    distance = self.dis_arm_sensor.getValue()
-                    if distance > 900:
-                        dis = self.calculate_place_distance()
-                        self.turn_angle(-5, False, False,velocity=2)
-                        # self.move_distance_PID(distance= dis)
-                        self.step(50 * self.timestep)
-                        # print('dis',distance)
-                        # print('norm:',dis)
-                        # print('factor',angle/100)
-                        factor = angle/70
-                        self.place_on_area(ang = -factor)
-                        # self.move_distance_PID(distance= -dis)
-                        self.turn_angle(angle - 5,True,False,velocity=2)
-                        print(f"Current Angle: {angle}, Distance: {distance}")
-                        return
-                else:
-                    self.turn_angle(angle - 2,True,False,velocity=2)
+                    print('round2')
+                    for angle in range(0, -40, -5):  
+                        self.turn_angle(-5, False,False,velocity=2)  
+                        distance = self.dis_arm_sensor.getValue()
+                        if distance > 900:
+                            # dis = self.calculate_place_distance()
+                            self.turn_angle(-5, False, False,velocity=2)
+                            angle_fix = step - 3
+                            print('step: ',step)
+                            while (step - 3) > 1:
+                                self.turn_angle(-5 - (angle_fix -1)*5 , False,False ,velocity=2)
+                                step-=1
+                            self.move_distance_PID(distance= dis)
+                            # print('dis',distance)
+                            # print('norm:',dis)
+                            # print('factor',angle/100)
+                            factor = angle/70
+                            self.place_on_area(ang = -factor)
+                            self.move_distance_PID(distance= -dis)
+                            self.step(50 * self.timestep)
+                            self.turn_angle(angle - (angle_fix * 5) - ((angle_fix -1)*5),True,False,velocity=2)
+                            print(f"Current Angle: {angle}, Distance: {distance}")
+                            return
+                    else:
+                        self.turn_angle(angle - 2,True,False,velocity=2)
             return
 
     def calculate_move_distance(self, distance):
@@ -791,30 +846,32 @@ class RobotController(Supervisor):
             self.hand_up()
         elif position_in_set == 2:
             # Cube 2 or 4: Move left by 0.1 and then back
-            self.move_distance_left_right(0.1)
+            self.move_distance_left_right(0.12)
             self.wait(20)
             self.place_on_wall()
             self.hand_up()
-            self.move_distance_left_right(-0.1)
+            self.move_distance_left_right(-0.12)
             self.wait(20)
         elif position_in_set == 3:
             # Cube 3: Move right by 0.1 and then back
-            self.move_distance_left_right(0.2)
+            self.move_distance_left_right(0.23)
             self.wait(20)
             self.place_on_wall()
             self.hand_up()
-            self.move_distance_left_right(-0.2)
+            self.move_distance_left_right(-0.23)
             self.wait(20)
         elif position_in_set == 4:
             # Cube 4: Move left by 0.1 and then back
-            self.move_distance_left_right(-0.1)
+            self.move_distance_left_right(-self.distance)
             self.wait(20)
             self.place_on_wall()
             self.hand_up()
-            self.move_distance_left_right(0.1)
+            self.move_distance_left_right(self.distance)
             self.wait(20)
         
     def process_colors_r1(self):
+        if self.box_pick_step>=1:
+            self.wait(3000)
         for color in list(self.color_queue.queue):
             print('color:',color)  
             # color = self.color_queue.get()  
@@ -924,8 +981,8 @@ class RobotController(Supervisor):
     def search_for_color(self, target_color):
 
         check = 0
-        self.armMotors[2].setPosition(0.2)
-        self.armMotors[3].setPosition(-1.75)
+        self.armMotors[2].setPosition(0.25)
+        self.armMotors[3].setPosition(-1.8)
         self.step(100 * self.timestep)
         self.open_grippers()
         print('fix err',self.fix_left_right_err)
@@ -942,34 +999,35 @@ class RobotController(Supervisor):
                     self.step(100 * self.timestep)
                     return done
         
-        while check <= 0.3:
-            check+=0.1
-            self.move_distance_left_right(0.1,7)
+        while check <= 0.2:
+            check+=0.11
+            self.move_distance_left_right(0.11,2)
             self.step(self.timestep * 20)
-            self.fix_left_right_err+=0.1
+            self.fix_left_right_err+=0.11
             camera_data = self.arm_camera.getImageArray()
             if camera_data:
                 detected_color = self.detect_color(camera_data)
                 if detected_color == target_color:
                     while self.step(self.timestep) != -1:
+                            # self.wait(100)
                             done=self.dynamic_pick_from_wall()
                             if done:
                                 self.pick_count+=1
                                 self.armMotors[2].setPosition(0)
                                 self.armMotors[3].setPosition(-0.5)
                                 self.step(100 * self.timestep)
-                                self.move_distance_left_right(-check,7)
+                                self.move_distance_left_right(-check,2)
                                 self.step(self.timestep * 50)
                                 return done
         else:
-            self.move_distance_left_right(-check,7)
+            self.move_distance_left_right(-check,2)
             self.fix_left_right_err-=check
             self.step(self.timestep * 50)
             check = 0
         print('check',check)
-        while check >= -0.3:
-            check-=0.1
-            self.move_distance_left_right(-0.1,7)
+        while check >= -0.2:
+            check-=0.11
+            self.move_distance_left_right(-0.11,2)
             self.step(self.timestep * 20)
             self.fix_left_right_err-=0.1
             camera_data = self.arm_camera.getImageArray()
@@ -977,65 +1035,352 @@ class RobotController(Supervisor):
                 detected_color = self.detect_color(camera_data)
                 if detected_color == target_color:
                     while self.step(self.timestep) != -1:
+                            # self.wait(100)
                             done=self.dynamic_pick_from_wall()
                             if done:
                                 self.pick_count+=1
                                 self.armMotors[2].setPosition(0)
                                 self.armMotors[3].setPosition(-0.5)
                                 self.step(100 * self.timestep)
-                                self.move_distance_left_right(-check,7)
+                                self.move_distance_left_right(-check,2)
                                 self.step(self.timestep * 50)
                                 return done
         else:
             print('cheak in -',check)
-            self.move_distance_left_right(-check,7)
+            self.move_distance_left_right(-check,2)
             self.fix_left_right_err+=check
             self.step(self.timestep * 50)
             check = 0
                    
-        print(f"لم يتم العثور على اللون {target_color}.")
         return False
-    def loop(self):
+    
+    def choose_colors_box2_r1(self):
+        color_list = list(self.color_queue.queue)
+        
+        # Iterate over the colors in pairs
+        for i in range(0, len(color_list), 2):
+            if i + 1 < len(color_list):
+                # Get the current and next colors
+                current_color = color_list[i]
+                next_color = color_list[i + 1]
+                
+                self.pick_up_box2_color(current_color=current_color,next_color=next_color)
+    
+    def pick_up_box2_color(self, current_color,next_color):
+        color_actions = {
+            'red': self.go_to_red_area,
+            'green': self.go_to_green_area,
+            'blue': self.go_to_blue_area,
+            'yellow': self.go_to_yellow_area
+        }
+        
+        if next_color in color_actions:
+                color_actions[next_color]()
+                self.pick_up_cubes()
+                self.drop()
+                # self.place_on_wall()
+                self.hand_up()
+                self.go_to_intersection()
+                color_actions[current_color]()
+                self.pick_up_cubes()
+                self.go_to_wall()
+                self.pick_count-=1
+                self.move_place_wall()
+                self.pick_from_drop()
+                self.from_drop_to_wall()
+                self.pick_count+=1
+                self.move_place_wall()
 
-        # self.pick_up_cubes()
+    def choose_colors_box2_r2(self):
+        color_list = list(self.color_queue.queue)
+        self.wait(18000)
+        # Iterate over the colors in pairs
+        for i in range(0, len(color_list), 2):
+            if i + 1 < len(color_list):
+                # Get the current and next colors
+                current_color = color_list[i]
+                next_color = color_list[i + 1]
+                print('enter 2')
+                self.pick_up_box2_color_r2(current_color=current_color,next_color=next_color)
+    
+    
+    def pick_up_box2_color_r2(self, current_color,next_color):
+        color_actions = {
+            'red': self.go_to_red_area,
+            'green': self.go_to_green_area,
+            'blue': self.go_to_blue_area,
+            'yellow': self.go_to_yellow_area
+        }
+        print('enter 3')
+        if next_color in color_actions:
+                self.go_to_wall()
+                while True:
+                    done = self.search_for_color(next_color)
+                    if done:
+                        break
+                self.from_drop_to_wall()
+                self.drop()
+                self.hand_up()
+                while True:
+                    done = self.search_for_color(current_color)
+                    if done:
+                        break
+                
+                color_actions[current_color]()
+                self.place_up_cubes()
+                self.go_to_intersection()
+                color_actions[next_color]()
+                self.pick_from_drop()
+                self.from_drop_to_wall()
+                self.place_up_cubes()
+                
+                # self.place_on_wall()
+                # self.pick_count-=1
+                # self.move_place_wall()
+                # # self.pick_count+=1
+                # self.move_place_wall()
+                
+    def process_colors_ch_r1(self):
+        if self.box_pick_step>=1:
+            self.wait(3000)
+        for color in list(self.color_queue.queue):
+            print('color:',color)  
+            # color = self.color_queue.get()  
+            if color == 'red':
+                # self.go_to_red_area()
+                # self.pick_up_cubes()
+                # self.go_to_wall()
+                # # self.place_on_wall()
+                # # self.hand_up()
+                # self.move_place_wall()
+                pass
+            elif color == 'green':
+                for _ in range(7):
+                    self.go_to_green_area()
+                    self.pick_up_cubes()
+                    self.go_to_wall()
+                    # self.place_on_wall()
+                    # self.hand_up()
+                    self.move_place_wall()
+                    
+            elif color == 'blue':
+                self.go_to_blue_area()
+                self.pick_up_cubes()
+                self.go_to_wall()
+                # self.place_on_wall()
+                # self.hand_up()
+                self.move_place_wall()
+                
+            elif color == 'yellow':
+                self.go_to_yellow_area()
+                self.pick_up_cubes()
+                self.go_to_wall()
+                # self.place_on_wall()
+                # self.hand_up()
+                self.move_place_wall()
+                
+                
+    def process_colors_ch_r2(self):
+        for color in list(self.color_queue.queue):  
+            if color == 'red':
+                current_position = (0, 0)  # Initialize the starting position
+                for _ in range(7):
+                    self.go_to_wall()
+                    while True:
+                        done = self.search_for_color(color)
+                        if done:
+                            break
+                    self.go_to_red_area()
+                    
+                    # Continue drawing the character from the last position
+                    current_position = self.draw_character(self.N_char, *current_position)
+                    
+                    # If drawing is complete, reset the current_position
+                    if current_position is None:
+                        current_position = (0, 0)
+               
+            elif color == 'green':
+                current_position = (0, 0)  # Initialize the starting position
+                for _ in range(7):
+                    self.go_to_wall()
+                    while True:
+                        done = self.search_for_color(color)
+                        if done:
+                            break
+                    self.go_to_green_area()
+                    
+                    # Continue drawing the character from the last position
+                    current_position = self.draw_character(self.N_char, *current_position)
+                    
+                    # If drawing is complete, reset the current_position
+                    if current_position is None:
+                        current_position = (0, 0)
+            elif color == 'blue':
+                self.go_to_wall()
+                # self.pick_From_wall()
+                while True:
+                    done = self.search_for_color(color)
+                    if done:
+                        break
+                
+                self.go_to_blue_area()
+                # self.place_on_area()
+                self.place_up_cubes()
+            elif color == 'yellow':
+                self.go_to_wall()
+                # self.pick_From_wall()
+                while True:
+                    done = self.search_for_color(color)
+                    if done:
+                        break
+                self.go_to_yellow_area()
+                # self.place_on_area()
+                self.place_up_cubes()
+                
+                
+    def move_distance_left_right2(
+        self,
+        distance,
+        direction,
+        velocity = YOUBOT_MAX_VELOCITY,      
+    ):
+
+        rotations = abs(distance) / (2 * math.pi * YOUBOT_WHEEL_RADIUS)
+        self.run_motors_for_left_right2(
+            rotations,
+            velocity,
+            direction
+        )
+        
+    
+    def run_motors_for_left_right2(
+        self,
+        rotations,
+        velocity,
+        direction
+    ):
+
+        # calculate angle = number_of_rotations / 2 * PI
+        angle = rotations * 2 * math.pi
+        # print('angle: ',angle)
+        print('angle: ', angle)
+        curr_front_left = self.f_left_w_sensor.getValue()
+        curr_back_left = self.b_right_w_sensor.getValue()
+
+        # print('curr_front_left: ',curr_front_left)
+        # print('curr_back_left: ',curr_back_left)
+        
+        if direction == 'left':
+            self.move_left(velocity)
+        else:
+            self.move_right(velocity)
+
+        while True:
+            current_front_left = self.f_left_w_sensor.getValue()
+            current_back_left = self.b_right_w_sensor.getValue()
+            
+            # print('current_front_left: ',current_front_left)
+            # print('current_back_left: ',current_back_left)
+            
+            diff_front_left = current_front_left - curr_front_left
+            diff_back_left = current_back_left - curr_back_left
+
+            # print('diff_front_left: ',diff_front_left)
+            # print('diff_back_left: ',diff_back_left)
+            avg_angle = (diff_front_left + diff_back_left) /2
+            # print('angle avg: ',avg_angle )
+            if abs(avg_angle) >= angle:
+                self.set_motors_velocity(0,0,0,0)
+                break
+            # print('move')
+            # print('sesor live move: ',avg_angle)
+            self.step(self.timestep)
+            
+    def place_on_area2(self, ang=0, row =1):
+        # Adjust arm position based on the row
+        vertical_offset = 0.25 * (2 - row)  # Calculate the vertical offset based on the row
+        self.armMotors[1].setPosition(-1.13 - vertical_offset*10)  # Adjust arm height
+        self.armMotors[3].setPosition(-1.1 + vertical_offset)
+        self.armMotors[2].setPosition(-1.15 + vertical_offset*0.5)  # Adjust arm height
+        self.armMotors[4].setPosition(ang)
+        self.wait(500)
+        self.open_grippers()
+        self.hand_up()
+        
+        
+    def draw_character(self, char_array, start_row=0, start_col=0):
+        for row_index in range(start_row, len(char_array)):
+            for col_index in range(start_col if row_index == start_row else 0, len(char_array[row_index])):
+                if char_array[row_index][col_index] == 1:
+                    if col_index == 1:  # Center column should not trigger movement
+                        self.place_on_area2(row=row_index)
+                        return (row_index, col_index + 1)  # Return the next starting position
+                    else:
+                        # Determine the direction: move "left" for (0, 0) and "right" for (0, 2)
+                        direction = "left" if col_index < 1 else "right"
+                        direction_2 = "right" if col_index < 1 else "left"
+                        print(f"Moving to ({row_index}, {col_index}): distance={0.25}, direction={direction}")
+                        self.move_distance_left_right2(0.20, direction, 7)
+                        self.place_on_area2(row=row_index)
+                        self.move_distance_left_right2(0.20, direction_2, 7)
+                        return (row_index, col_index + 1)  # Return the next starting position
+                else:
+                    print(f"Skipping cell ({row_index}, {col_index})")
+        return None  # Indicate completion of the character array
+    
+    
+    def step1(self):
         while(self.step(self.timestep) != -1):
-            # self.go_to_wall()
+            # # self.go_to_wall()
             if not self.read_array:
                 self.read_array_color()            
             else:
                 if self.robot_name == 'youBot(2)':
                     self.process_colors_r2()
-                    # self.go_to_wall()
-                    # self.search_for_color('red')
-                    # self.box_pick_step+=1
-                    break
+                    self.box_pick_step+=1
+                    # break
                 else:    
                     self.process_colors_r1()
-                    
+                    self.box_pick_step+=1
+                    # break
+    
+    def step2(self):
+        while(self.step(self.timestep) != -1):
+            # # self.go_to_wall()
+            self.distance= 0.11
+            if not self.read_array:
+                self.read_array_color()            
+            else:
+                if self.robot_name == 'youBot(2)':
+                    self.choose_colors_box2_r2()
+                    self.box_pick_step+=1
+
                     break
-            # if self.robot_name == 'youBot(2)':
-                
-            #     self.search_for_color('red')
-                
-            #     break
-            # else:
-            #     exit(0)
-                # self.process_colors()
-            #     self.go_to_red_area()
-            #     self.halt()
-            #     # self.pick_up()
-            #     break
-            # self.pick_up()
-            # self.fold_arms()
-            # self.stretch_arms()
-            
-            # self.hand_up()
-            # print(self.dis_arm_sensor.getValue())
+                else:    
+                    self.choose_colors_box2_r1()
+                    self.box_pick_step+=1
+                    break
+    
+    def loop(self):
+
+        while(self.step(self.timestep) != -1):
+            if not self.read_array:
+                self.read_array_color()            
+            else:
+                if self.robot_name == 'youBot(2)':
+                    self.process_colors_ch_r2()
+                    self.box_pick_step+=1
+                    break
+                else:    
+                    self.process_colors_ch_r1()
+                    self.box_pick_step+=1
+                    break
             
 
 
 
 r = RobotController()
-r.loop()
-# r.pick_up()
+# r.step1()
+r.step2()
+# r.loop()
 

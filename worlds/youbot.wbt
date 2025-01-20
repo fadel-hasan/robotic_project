@@ -44,8 +44,8 @@ WorldInfo {
 }
 Viewpoint {
   fieldOfView 0.785399
-  orientation 0.5276869452170507 0.5278674001736745 -0.6655092002980747 1.9668701665139599
-  position -1.516358007876199 4.275290358357127 20.139764491153116
+  orientation 0.5126322855807453 0.5231676278323097 -0.6808111140166375 1.92712839381275
+  position 0.11008974595285914 2.9912085521194083 10.53805283318285
 }
 TexturedBackground {
 }
@@ -646,7 +646,7 @@ Pose {
             material Material {
               ambientIntensity 0
               diffuseColor 0 0 0
-              emissiveColor 1 1 0
+              emissiveColor 0 0 1
               shininess 0
             }
           }
@@ -664,7 +664,7 @@ Pose {
             material Material {
               ambientIntensity 0
               diffuseColor 0 0 0
-              emissiveColor 0 0 1
+              emissiveColor 1 0 0
               shininess 0
             }
           }
@@ -682,7 +682,7 @@ Pose {
             material Material {
               ambientIntensity 0
               diffuseColor 0 0 0
-              emissiveColor 0 1 0
+              emissiveColor 1 1 0
               shininess 0
             }
           }
@@ -700,7 +700,7 @@ Pose {
             material Material {
               ambientIntensity 0
               diffuseColor 0 0 0
-              emissiveColor 1 0 0
+              emissiveColor 0 1 0
               shininess 0
             }
           }
@@ -713,7 +713,7 @@ Pose {
   ]
 }
 Youbot {
-  translation 7.67483 0.000898826 0.103429
+  translation 7.69483 0.0009221 0.103471
   rotation -0.0010549876703533434 -2.08782920856154e-05 0.9999994432824013 -3.140428859713184
   name "youBot(1)"
   controller "project_cont_test_youbot"
@@ -788,7 +788,7 @@ Youbot {
   ]
 }
 Robot {
-  translation -7.69352 -0.00128054 0.117246
+  translation -7.67352 -0.00127697 0.117204
   rotation -0.019140557871357326 0.9962581398670348 0.08428142021257762 0.0021178921460601797
   children [
     Group {
@@ -2538,6 +2538,7 @@ Robot {
   supervisor TRUE
 }
 Wall {
+  translation -0.03 0 0
   size 0.2 10 0.5
 }
 Pose {
